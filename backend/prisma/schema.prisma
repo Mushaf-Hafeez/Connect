@@ -12,7 +12,169 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+
+enum FriendshipStatus {
+  PENDING // A sent request to B, waiting
+  ACCEPTED // They are friends
+  BLOCKED // A blocked B
+}
+
+enum MessageStatusEnum {
+  SENT // Saved in DB, not yet delivered
+  DELIVERED // Receiver's client connected and received it
+  SEEN // Receiver opened the conversation
+}
+
+enum ConversationType {
+  DIRECT // 1-on-1 chat (for now this is all you need)
+  GROUP // Ready for future use
+}
+
+// ─────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────
+
 model User {
-  user_id String @id @default(uuid())
-  name    String
+  id          String @id @default(uuid())
+  displayName String
+  username    String @unique
+  email       String @unique
+  password    String // bcrypt hash
+
+  profilePic String? // Cloudinary URL
+
+  isEmailVerified                 Boolean   @default(false)
+  emailVerificationToken          String?
+  emailVerificationTokenExpiresAt DateTime?
+
+  resetPasswordToken          String?
+  resetPasswordTokenExpiresAt DateTime?
+
+  lastSeen  DateTime? // null = never logged in
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  sentFriendRequests     Friendship[]              @relation("Requester")
+  receivedFriendRequests Friendship[]              @relation("Receiver")
+  conversations          ConversationParticipant[]
+  sentMessages           Message[]
+  messageStatuses        MessageStatus[]
+
+  @@index([email])
+  @@index([username])
+}
+
+// ─────────────────────────────────────────
+// FRIENDSHIP
+// ─────────────────────────────────────────
+
+model Friendship {
+  id     String           @id @default(uuid())
+  status FriendshipStatus @default(PENDING)
+
+  requesterId String
+  receiverId  String
+
+  requester User @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver  User @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Prevent duplicate friend requests in either direction
+  @@unique([requesterId, receiverId])
+  @@index([receiverId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────
+// CONVERSATION
+// ─────────────────────────────────────────
+
+model Conversation {
+  id   String           @id @default(uuid())
+  type ConversationType @default(DIRECT)
+
+  // For GROUP type only — null for DIRECT chats
+  name     String?
+  groupPic String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt // bump this on every new message (for sorting inbox)
+
+  // Relations
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+// ─────────────────────────────────────────
+// CONVERSATION PARTICIPANT
+// (join table: User <-> Conversation)
+// ─────────────────────────────────────────
+
+model ConversationParticipant {
+  id String @id @default(uuid())
+
+  userId         String
+  conversationId String
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  lastReadAt DateTime?
+
+  joinedAt DateTime @default(now())
+
+  @@unique([userId, conversationId]) // a user can only be in a conversation once
+  @@index([conversationId])
+}
+
+// ─────────────────────────────────────────
+// MESSAGE
+// ─────────────────────────────────────────
+
+model Message {
+  id String @id @default(uuid())
+
+  conversationId String
+  senderId       String
+
+  text        String? // nullable — maybe they send only an attachment
+  attachments String[] // array of Cloudinary URLs
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  conversation Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User            @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  statuses     MessageStatus[]
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+}
+
+// ─────────────────────────────────────────
+// MESSAGE STATUS
+// (per-user delivery/read receipt)
+// ─────────────────────────────────────────
+
+model MessageStatus {
+  id String @id @default(uuid())
+
+  messageId String
+  userId    String // the RECIPIENT (not sender)
+
+  status    MessageStatusEnum @default(SENT)
+  updatedAt DateTime          @updatedAt
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId]) // one status row per (message, recipient) pair
+  @@index([userId, status])
 }
