@@ -4,6 +4,11 @@ import type { Application, Request, Response, NextFunction } from "express";
 // importing types
 import type { CustomError } from "./types/index.js";
 
+// importing logger
+import logger from "./utils/logger.js";
+import httpLogger from "./utils/httpLogger.js";
+
+// environment variables
 import { config } from "dotenv";
 config();
 
@@ -14,10 +19,17 @@ const app: Application = express();
 
 // middlewares
 app.use(express.json());
+app.use(httpLogger);
 
 // global error handler
 app.use(
   (error: CustomError, req: Request, res: Response, next: NextFunction) => {
+    req.log.error({
+      message: error.message,
+      path: req.originalUrl,
+      method: req.method,
+    });
+
     const status = error.status || 500;
     const message = error.message || "Something went wrong.";
 
@@ -34,5 +46,5 @@ app.get("/", (req: Request, res: Response) => {
 
 // listen to the requests
 app.listen(PORT, () => {
-  console.log(`http://localhost:${PORT}`);
+  logger.info(`http://localhost:${PORT}`);
 });
