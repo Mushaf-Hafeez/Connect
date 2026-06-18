@@ -8,6 +8,9 @@ import type { CustomError } from "./types/index.js";
 import logger from "./utils/logger.js";
 import httpLogger from "./utils/httpLogger.js";
 
+// importing routes
+import authRoutes from "./routes/user.route.js";
+
 // environment variables
 import { config } from "dotenv";
 config();
@@ -20,6 +23,9 @@ const app: Application = express();
 // middlewares
 app.use(express.json());
 app.use(httpLogger);
+
+// mounting routes
+app.use("/api/v1/auth", authRoutes);
 
 // global error handler
 app.use(
