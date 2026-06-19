@@ -9,7 +9,7 @@ import logger from "./utils/logger.js";
 import httpLogger from "./utils/httpLogger.js";
 
 // importing routes
-import authRoutes from "./routes/user.route.js";
+import authRoutes from "./routes/auth.route.js";
 
 // environment variables
 import { config } from "dotenv";
@@ -34,13 +34,15 @@ app.use(
       message: error.message,
       path: req.originalUrl,
       method: req.method,
+      stack: error.stack,
     });
 
     const status = error.status || 500;
-    const message = error.message || "Something went wrong.";
 
     return res.status(status).json({
-      message,
+      success: false,
+      message: error.message || "Something went wrong.",
+      errors: error.errors || null,
     });
   },
 );
