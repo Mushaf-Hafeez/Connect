@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { email, z } from "zod";
 
 export const passwordSchema = z
   .string({
@@ -67,3 +67,33 @@ export const createAccountValidation = z
     message: "Passwords don't match.",
     path: ["confirmPassword"],
   });
+
+// login validations
+export const loginValidation = z.object({
+  email: z
+    .string({
+      error: () => "Email is required.",
+    })
+    .trim()
+    .email({
+      error: "Please provide a valid email address.",
+    }),
+
+  password: passwordSchema,
+});
+
+// verify email validation
+export const verifyEmailValidation = z.object({
+  email: z
+    .string({
+      error: () => "Email is required.",
+    })
+    .trim()
+    .email({
+      error: "Please provide a valid email address.",
+    }),
+
+  emailVerificationToken: z.uuid({
+    error: () => "Invalid email verification token.",
+  }),
+});

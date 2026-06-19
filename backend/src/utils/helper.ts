@@ -27,9 +27,9 @@ export const generateJWT = (payload: Payload) => {
 export const setCookie = (token: string, res: Response) => {
   res.cookie("token", token, {
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === "development",
-    secure: true,
-    maxAge: 7,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
 
@@ -37,5 +37,5 @@ export const createEmailVerificationLink = (
   emailVerificationToken: string,
   email: string,
 ) => {
-  return `process.env.FRONTEND_URL/verify-email?emailVerificationToken=${emailVerificationToken}&email=${email}`;
+  return `${process.env.FRONTEND_URL}/verify-email?emailVerificationToken=${emailVerificationToken}&email=${email}`;
 };

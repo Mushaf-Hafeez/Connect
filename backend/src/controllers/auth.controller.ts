@@ -3,16 +3,25 @@ import type { Request, Response, NextFunction } from "express";
 import prisma from "../config/db.config.js";
 import AppError from "../utils/AppError.js";
 
-import { createAccountValidation } from "../validations/auth.validation.js";
+import {
+  createAccountValidation,
+  loginValidation,
+  verifyEmailValidation,
+} from "../validations/auth.validation.js";
 import {
   createEmailVerificationLink,
   formatZodErrors,
+  generateJWT,
+  setCookie,
 } from "../utils/helper.js";
 
 import bcrypt from "bcryptjs";
 import { sendEmailVerificationLink } from "../utils/mail.js";
+import { email } from "zod";
 
-// singup controller
+// ======================================================
+//             signup contoller
+// ======================================================
 export const signup = async (
   req: Request,
   res: Response,
@@ -119,6 +128,163 @@ export const signup = async (
     } else {
       // if user exists and also email is verified then throw error
       throw new AppError(400, "User already exists.");
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             login contoller
+// ======================================================
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // validation
+    const result = loginValidation.safeParse(req.body);
+
+    // handle validtion error
+    if (!result.success) {
+      throw new AppError(
+        400,
+        "Validation failed.",
+        formatZodErrors(result.error),
+      );
+    }
+
+    const { email, password } = result.data;
+
+    // throw error if user not exists
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new AppError(404, "User not found.");
+    }
+
+    if (user && !user.isEmailVerified) {
+      throw new AppError(401, "First verify your email.");
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      throw new AppError(400, "Invalid password.");
+    } else {
+      const payload = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+      };
+
+      const token: string = generateJWT(payload);
+
+      setCookie(token, res);
+
+      // get non-confidential information from the user's object
+      const {
+        password,
+        resetPasswordToken,
+        resetPasswordTokenExpiresAt,
+        emailVerificationToken,
+        emailVerificationTokenExpiresAt,
+        ...safeUser
+      } = user;
+
+      return res.status(200).json({
+        success: true,
+        user: safeUser,
+        message: "Login successful.",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             verifyEmail contoller
+// ======================================================
+export const verifyEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // validaiton
+    const result = verifyEmailValidation.safeParse(req.body);
+
+    // handle validtion error
+    if (!result.success) {
+      throw new AppError(
+        400,
+        "Validation failed.",
+        formatZodErrors(result.error),
+      );
+    }
+
+    const { email, emailVerificationToken } = result.data;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        AND: [{ email }, { emailVerificationToken }],
+      },
+    });
+
+    if (!user) {
+      throw new AppError(404, "User not found.");
+    }
+
+    if (user && user.emailVerificationTokenExpiresAt) {
+      if (user.emailVerificationTokenExpiresAt <= new Date(Date.now())) {
+        throw new AppError(400, "Token expired.");
+      } else {
+        const updatedUser = await prisma.user.update({
+          where: {
+            email,
+          },
+          data: {
+            emailVerificationToken: null,
+            emailVerificationTokenExpiresAt: null,
+            isEmailVerified: true,
+          },
+        });
+
+        const {
+          password,
+          emailVerificationToken,
+          emailVerificationTokenExpiresAt,
+          resetPasswordToken,
+          resetPasswordTokenExpiresAt,
+          ...safeUser
+        } = updatedUser;
+
+        const payload = {
+          id: updatedUser.id,
+          username: updatedUser.username,
+          email: updatedUser.email,
+          isEmailVerified: updatedUser.isEmailVerified,
+        };
+
+        // create token
+        const token = generateJWT(payload);
+
+        // set cookie
+        setCookie(token, res);
+
+        return res.status(200).json({
+          success: true,
+          user: safeUser,
+          message: "Email verified.",
+        });
+      }
     }
   } catch (error) {
     next(error);
