@@ -4,6 +4,7 @@ import prisma from "../config/db.config.js";
 import AppError from "../utils/AppError.js";
 
 import {
+  changePasswordValidation,
   createAccountValidation,
   emailValidation,
   loginValidation,
@@ -417,6 +418,46 @@ export const resetPassword = async (
         });
       }
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             changePassword contoller
+// ======================================================
+export const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // validation
+    const result = changePasswordValidation.safeParse(req.body);
+
+    // handle validatin error
+    if (!result.success) {
+      throw new AppError(400, "Validation failed.");
+    }
+
+    const { password } = result.data;
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    await prisma.user.update({
+      where: {
+        email: req.user.email,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password has been changed.",
+    });
   } catch (error) {
     next(error);
   }

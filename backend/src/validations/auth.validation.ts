@@ -111,3 +111,20 @@ export const resetPasswordValidation = z
     message: "Passwords don't match.",
     path: ["confirmPassword"],
   });
+
+// changePasswordValidation
+export const changePasswordValidation = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z
+      .string({
+        error: () => "Please confirm your password.",
+      })
+      .min(1, {
+        error: "Please confirm your password.",
+      }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match.",
+    path: ["confirmPassword"],
+  });
