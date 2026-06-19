@@ -39,3 +39,10 @@ export const createEmailVerificationLink = (
 ) => {
   return `${process.env.FRONTEND_URL}/verify-email?emailVerificationToken=${emailVerificationToken}&email=${email}`;
 };
+
+export const createResetPasswordLink = (
+  resetPasswordToken: string,
+  email: string,
+) => {
+  return `${process.env.FRONTEND_URL}/reset-password?resetPasswordToken=${resetPasswordToken}&email=${email}`;
+};

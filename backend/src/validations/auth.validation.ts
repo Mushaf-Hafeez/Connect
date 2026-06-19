@@ -14,6 +14,15 @@ export const passwordSchema = z
     error: "Must contain at least one special character",
   });
 
+export const emailSchema = z
+  .string({
+    error: () => "Email is required.",
+  })
+  .trim()
+  .email({
+    error: "Please provide a valid email address.",
+  });
+
 // validation to create account
 export const createAccountValidation = z
   .object({
@@ -44,14 +53,7 @@ export const createAccountValidation = z
         error: "Username can only contain letters, numbers and underscores.",
       }),
 
-    email: z
-      .string({
-        error: () => "Email is required.",
-      })
-      .trim()
-      .email({
-        error: "Please provide a valid email address.",
-      }),
+    email: emailSchema,
 
     password: passwordSchema,
 
@@ -70,30 +72,42 @@ export const createAccountValidation = z
 
 // login validations
 export const loginValidation = z.object({
-  email: z
-    .string({
-      error: () => "Email is required.",
-    })
-    .trim()
-    .email({
-      error: "Please provide a valid email address.",
-    }),
+  email: emailSchema,
 
   password: passwordSchema,
 });
 
 // verify email validation
 export const verifyEmailValidation = z.object({
-  email: z
-    .string({
-      error: () => "Email is required.",
-    })
-    .trim()
-    .email({
-      error: "Please provide a valid email address.",
-    }),
+  email: emailSchema,
 
   emailVerificationToken: z.uuid({
     error: () => "Invalid email verification token.",
   }),
 });
+
+// email validation
+export const emailValidation = z.object({
+  email: emailSchema,
+});
+
+// resetPasswordValidation
+export const resetPasswordValidation = z
+  .object({
+    email: emailSchema,
+    resetPasswordToken: z.uuid({
+      error: () => "Invalid reset password token.",
+    }),
+    password: passwordSchema,
+    confirmPassword: z
+      .string({
+        error: () => "Please confirm your password.",
+      })
+      .min(1, {
+        error: "Please confirm your password.",
+      }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match.",
+    path: ["confirmPassword"],
+  });
