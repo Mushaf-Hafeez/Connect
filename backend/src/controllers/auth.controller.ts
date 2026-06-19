@@ -421,3 +421,43 @@ export const resetPassword = async (
     next(error);
   }
 };
+
+// ======================================================
+//             checkAuth contoller
+// ======================================================
+export const checkAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req.user;
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             logout contoller
+// ======================================================
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    res.clearCookie("token");
+
+    return res.status(200).json({
+      success: true,
+      message: "Logout successful.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

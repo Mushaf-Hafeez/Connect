@@ -8,12 +8,19 @@ import {
   verifyEmail,
   forgotPassword,
   resetPassword,
+  checkAuth,
+  logout,
 } from "../controllers/auth.controller.js";
+
+// importing middlwares
+import { isAuth } from "../middlewares/auth.middleware.js";
 
 authRoutes.post("/signup", signup);
 authRoutes.post("/login", login);
 authRoutes.put("/verify-email", verifyEmail);
 authRoutes.put("/forgot-password", forgotPassword);
 authRoutes.put("/reset-password", resetPassword);
+authRoutes.get("/check-auth", isAuth, checkAuth);
+authRoutes.get("/logout", isAuth, logout);
 
 export default authRoutes;
