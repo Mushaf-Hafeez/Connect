@@ -8,6 +8,8 @@ import type { CustomError } from "./types/index.js";
 import logger from "./utils/logger.js";
 import httpLogger from "./utils/httpLogger.js";
 
+import cookieParser from "cookie-parser";
+
 // importing routes
 import authRoutes from "./routes/auth.route.js";
 
@@ -22,6 +24,7 @@ const app: Application = express();
 
 // middlewares
 app.use(express.json());
+app.use(cookieParser());
 app.use(httpLogger);
 
 // mounting routes

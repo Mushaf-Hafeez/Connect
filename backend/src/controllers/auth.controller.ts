@@ -23,7 +23,6 @@ import {
   sendEmailVerificationLink,
   sendResetPasswordLink,
 } from "../utils/mail.js";
-import { email } from "zod";
 
 // ======================================================
 //             signup contoller
