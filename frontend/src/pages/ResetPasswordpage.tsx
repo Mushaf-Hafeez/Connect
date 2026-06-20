@@ -1,46 +1,24 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeClosed } from "lucide-react"
-import { useState } from "react"
-import { Link } from "react-router-dom"
 
 import { useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
-import toast from "react-hot-toast"
-import { signup } from "@/services/auth.service"
-import Spinner from "@/components/custom/Spinner"
 
-const SignupSchema = z
+import { useNavigate, useSearchParams } from "react-router-dom"
+import toast from "react-hot-toast"
+import Spinner from "@/components/custom/Spinner"
+import { resetPassword } from "@/services/auth.service"
+import { userStore } from "@/zustand/userStore"
+import { useStore } from "zustand"
+
+const resetPasswordSchema = z
   .object({
-    displayName: z
-      .string({
-        error: () => "Display name is required.",
-      })
-      .trim()
-      .min(2, {
-        error: "Display name must be at least 2 characters.",
-      })
-      .max(50, {
-        error: "Display name cannot exceed 50 characters.",
-      }),
-    username: z
-      .string({
-        error: () => "Username is required.",
-      })
-      .trim()
-      .min(3, {
-        error: "Username must be at least 3 characters.",
-      })
-      .max(30, {
-        error: "Username cannot exceed 30 characters.",
-      })
-      .regex(/^[a-zA-Z0-9_]+$/, {
-        error: "Username can only contain letters, numbers and underscores.",
-      }),
     email: z
       .string({
         error: () => "Email is required.",
@@ -49,6 +27,9 @@ const SignupSchema = z
       .email({
         error: "Please provide a valid email address.",
       }),
+    resetPasswordToken: z.uuid({
+      error: () => "Invalid reset password token.",
+    }),
     password: z
       .string({
         error: (iss) =>
@@ -77,27 +58,28 @@ const SignupSchema = z
     path: ["confirmPassword"],
   })
 
-type SignupData = z.infer<typeof SignupSchema>
+type ResetPasswordData = z.infer<typeof resetPasswordSchema>
 
-const Signup = () => {
+const ResetPasswordpage = () => {
+  const { clearUser } = useStore(userStore)
+  const [searchParams] = useSearchParams()
+
   const {
     register,
     handleSubmit,
-    setError,
-    clearErrors,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting, errors },
     reset,
-  } = useForm<SignupData>({
+  } = useForm<ResetPasswordData>({
     defaultValues: {
-      displayName: "",
-      username: "",
-      email: "",
+      email: searchParams.get("email") || "",
+      resetPasswordToken: searchParams.get("resetPasswordToken") || "",
       password: "",
       confirmPassword: "",
     },
     mode: "onChange",
-    resolver: zodResolver(SignupSchema),
+    resolver: zodResolver(resetPasswordSchema),
   })
+  const navigate = useNavigate()
 
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
@@ -112,26 +94,24 @@ const Signup = () => {
     setShowConfirmPassword((prev) => !prev)
   }
 
-  const onSubmit: SubmitHandler<SignupData> = async (data) => {
-    console.log(data)
-
+  const onSubmit: SubmitHandler<ResetPasswordData> = async (data) => {
     try {
-      const response = await signup(data)
+      const response = await resetPassword(data)
 
-      if (response.status === 201 || response.status === 200) {
-        // reset the form
+      if (response.status === 200) {
+        clearUser()
+
         reset({
-          displayName: "",
-          username: "",
           email: "",
+          resetPasswordToken: "",
           password: "",
           confirmPassword: "",
         })
 
-        toast.success(response.data.message)
+        navigate("/login")
       }
     } catch (error) {
-      console.log("Error in signup component: ", error)
+      console.log("Error in the reset password page: ", error)
       toast.error(error.response.data.message)
     }
   }
@@ -140,69 +120,31 @@ const Signup = () => {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-
+          <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Enter your details to get started
+            Enter your new password below
           </p>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                {...register("displayName")}
-                id="name"
-                type="text"
-                placeholder="John Doe"
-              />
-              {errors.displayName && (
-                <p className="text-red-400">{errors.displayName.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                {...register("username")}
-                id="username"
-                type="text"
-                placeholder="johndoe"
-              />
-              {errors.username && (
-                <p className="text-red-400">{errors.username.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                {...register("email")}
-                id="email"
-                type="email"
-                placeholder="john@example.com"
-              />
-              {errors.email && (
-                <p className="text-red-400">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">New Password</Label>
               <div className="relative flex items-center">
                 <Input
                   {...register("password")}
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder="Enter new password"
                 />
+
                 <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-lg"
+                  className="absolute right-0 flex-center"
                   onClick={handleShowPassword}
-                  variant={"ghost"}
-                  size={"icon-lg"}
-                  className="absolute right-0 flex-center cursor-pointer"
                 >
                   {showPassword ? <EyeClosed size={18} /> : <Eye size={18} />}
                 </Button>
@@ -212,6 +154,7 @@ const Signup = () => {
               )}
             </div>
 
+            {/* Confirm Password */}
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative flex items-center">
@@ -219,14 +162,15 @@ const Signup = () => {
                   {...register("confirmPassword")}
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
+                  placeholder="Confirm new password"
                 />
+
                 <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-lg"
+                  className="absolute right-0 flex-center"
                   onClick={handleShowConfirmPassword}
-                  variant={"ghost"}
-                  size={"icon-lg"}
-                  className="absolute right-0 flex-center cursor-pointer"
                 >
                   {showConfirmPassword ? (
                     <EyeClosed size={18} />
@@ -243,26 +187,16 @@ const Signup = () => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex w-full cursor-pointer items-center gap-2"
+              className="flex w-full items-center gap-2"
             >
               {isSubmitting && <Spinner />}
-              Create Account
+              Reset Password
             </Button>
           </form>
-
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-primary hover:underline"
-            >
-              Login
-            </Link>
-          </p>
         </CardContent>
       </Card>
     </div>
   )
 }
 
-export default Signup
+export default ResetPasswordpage

@@ -45,14 +45,13 @@ const loginSchema = z.object({
 
 type LoginData = z.infer<typeof loginSchema>
 
-const Login = () => {
+const Loginpage = () => {
   const { setUser } = useStore(userStore)
 
   const {
     register,
     handleSubmit,
-    setError,
-    clearErrors,
+
     formState: { errors, isSubmitting },
     reset,
   } = useForm<LoginData>({
@@ -179,4 +178,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default Loginpage

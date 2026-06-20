@@ -13,9 +13,20 @@ interface SignupData {
   confirmPassword: string
 }
 
-interface emailVerificationData {
+interface EmailVerificationData {
   email: string
   emailVerificationToken: string
+}
+
+interface ForgotPasswordData {
+  email: string
+}
+
+interface ResetPasswordData {
+  email: string
+  resetPasswordToken: string
+  password: string
+  confirmPassword: string
 }
 
 // login function
@@ -30,8 +41,20 @@ export const signup = (data: SignupData) => {
   return response
 }
 
-// signup function
-export const verifyEmail = (data: emailVerificationData) => {
+// verifyEmail function
+export const verifyEmail = (data: EmailVerificationData) => {
   const response = api.put("/auth/verify-email", data)
+  return response
+}
+
+// forgotPassword function
+export const forgotPassword = (data: ForgotPasswordData) => {
+  const response = api.put("/auth/forgot-password", data)
+  return response
+}
+
+// resetPassword function
+export const resetPassword = (data: ResetPasswordData) => {
+  const response = api.put("/auth/reset-password", data)
   return response
 }
