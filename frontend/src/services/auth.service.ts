@@ -13,6 +13,11 @@ interface SignupData {
   confirmPassword: string
 }
 
+interface emailVerificationData {
+  email: string
+  emailVerificationToken: string
+}
+
 // login function
 export const login = (data: LoginData) => {
   const response = api.post("/auth/login", data)
@@ -22,5 +27,11 @@ export const login = (data: LoginData) => {
 // signup function
 export const signup = (data: SignupData) => {
   const response = api.post("/auth/signup", data)
+  return response
+}
+
+// signup function
+export const verifyEmail = (data: emailVerificationData) => {
+  const response = api.put("/auth/verify-email", data)
   return response
 }
