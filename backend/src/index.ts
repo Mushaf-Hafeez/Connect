@@ -9,6 +9,7 @@ import logger from "./utils/logger.js";
 import httpLogger from "./utils/httpLogger.js";
 
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 // importing routes
 import authRoutes from "./routes/auth.route.js";
@@ -26,6 +27,12 @@ const app: Application = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(httpLogger);
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  }),
+);
 
 // mounting routes
 app.use("/api/v1/auth", authRoutes);
