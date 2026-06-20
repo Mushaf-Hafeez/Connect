@@ -67,7 +67,7 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState<boolean>(false)
 
-  // funciton to show/hide the password
+  // function to show/hide the password
   const handleShowPassword = () => {
     setShowPassword((prev) => !prev)
   }
