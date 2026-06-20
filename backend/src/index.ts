@@ -1,13 +1,61 @@
-import prisma from "./config/db.config.js";
+import express from "express";
+import type { Application, Request, Response, NextFunction } from "express";
 
-async function main() {
-  try {
-    const user = await prisma.user.findMany();
+// importing types
+import type { CustomError } from "./types/index.js";
 
-    console.log(user);
-  } catch (error) {
-    console.log(error);
-  }
-}
+// importing logger
+import logger from "./utils/logger.js";
+import httpLogger from "./utils/httpLogger.js";
 
-main();
+import cookieParser from "cookie-parser";
+
+// importing routes
+import authRoutes from "./routes/auth.route.js";
+
+// environment variables
+import { config } from "dotenv";
+config();
+
+const PORT = process.env.PORT || 3000;
+
+// app instance
+const app: Application = express();
+
+// middlewares
+app.use(express.json());
+app.use(cookieParser());
+app.use(httpLogger);
+
+// mounting routes
+app.use("/api/v1/auth", authRoutes);
+
+// global error handler
+app.use(
+  (error: CustomError, req: Request, res: Response, next: NextFunction) => {
+    req.log.error({
+      message: error.message,
+      path: req.originalUrl,
+      method: req.method,
+      stack: error.stack,
+    });
+
+    const status = error.status || 500;
+
+    return res.status(status).json({
+      success: false,
+      message: error.message || "Something went wrong.",
+      errors: error.errors || null,
+    });
+  },
+);
+
+// default route
+app.get("/", (req: Request, res: Response) => {
+  res.send("server is working fine...");
+});
+
+// listen to the requests
+app.listen(PORT, () => {
+  logger.info(`http://localhost:${PORT}`);
+});
