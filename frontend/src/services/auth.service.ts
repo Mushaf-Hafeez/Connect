@@ -58,3 +58,9 @@ export const resetPassword = (data: ResetPasswordData) => {
   const response = api.put("/auth/reset-password", data)
   return response
 }
+
+// logout function
+export const logout = () => {
+  const response = api.get("/auth/logout")
+  return response
+}
