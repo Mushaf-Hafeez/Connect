@@ -19,7 +19,6 @@ datasource db {
 enum FriendshipStatus {
   PENDING // A sent request to B, waiting
   ACCEPTED // They are friends
-  BLOCKED // A blocked B
 }
 
 enum MessageStatusEnum {
