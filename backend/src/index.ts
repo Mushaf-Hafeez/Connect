@@ -14,6 +14,7 @@ import cors from "cors";
 // importing routes
 import authRoutes from "./routes/auth.route.js";
 import friendRoutes from "./routes/friend.route.js";
+import userRoutes from "./routes/user.route.js";
 
 // environment variables
 import { config } from "dotenv";
@@ -38,6 +39,7 @@ app.use(
 // mounting routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/friends", friendRoutes);
+app.use("/api/v1/users", userRoutes);
 
 // global error handler
 app.use(
