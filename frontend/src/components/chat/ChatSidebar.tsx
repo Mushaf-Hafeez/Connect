@@ -26,13 +26,16 @@ import {
 } from "@/components/ui/dialog"
 
 import ChatList from "./ChatList"
-import toast from "react-hot-toast"
 
 import z from "zod"
 import { useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Spinner from "../custom/Spinner"
+import { searchUser } from "@/services/user.service"
+
+import type { User } from "@/types/user"
+import SearchedUsers from "../custom/SearchedUsers"
 
 const addFriendSchema = z.object({
   username: z
@@ -40,8 +43,8 @@ const addFriendSchema = z.object({
       error: () => "Username is required.",
     })
     .trim()
-    .min(3, {
-      error: "Username must be at least 3 characters.",
+    .min(1, {
+      error: "Username must be at least 1 character.",
     })
     .max(30, {
       error: "Username cannot exceed 30 characters.",
@@ -68,17 +71,21 @@ const ChatSidebar = () => {
     mode: "onChange",
   })
 
+  const [users, setUsers] = useState<User[] | null>(null)
   const [open, setOpen] = useState<boolean>(false)
 
-  const onSubmit: SubmitHandler<AddFriendData> = (data) => {
+  const onSubmit: SubmitHandler<AddFriendData> = async (data) => {
     clearErrors()
     try {
-      toast.success(data.username)
-      // Todo:
-      // make the api to get the user and then set the user
-      reset({
-        username: "",
-      })
+      const response = await searchUser(data.username)
+
+      if (response.status === 200) {
+        setUsers(response.data.users)
+
+        reset({
+          username: "",
+        })
+      }
     } catch (error) {
       console.log("Error in add friend component: ", error)
     }
@@ -91,7 +98,6 @@ const ChatSidebar = () => {
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Messages</h1>
 
-          {/* Todo: replace the icon with menu  */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size={"icon"} className="cursor-pointer">
@@ -133,6 +139,8 @@ const ChatSidebar = () => {
                       {errors.username.message}
                     </p>
                   )}
+                  {/* list searched users */}
+                  <SearchedUsers users={users} />
                 </form>
               </DialogHeader>
             </DialogContent>

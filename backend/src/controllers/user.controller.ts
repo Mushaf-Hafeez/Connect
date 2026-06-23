@@ -25,7 +25,7 @@ export const searchUser = async (
 
     const { username } = result.data;
 
-    const user = await prisma.user.findMany({
+    const users = await prisma.user.findMany({
       where: {
         AND: [
           {
@@ -49,7 +49,7 @@ export const searchUser = async (
 
     return res.status(200).json({
       success: true,
-      user,
+      users,
     });
   } catch (error) {
     next(error);
