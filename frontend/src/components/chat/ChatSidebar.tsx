@@ -5,7 +5,6 @@ import {
   MessageCircle,
   Phone,
   Search,
-  SearchIcon,
   Users,
 } from "lucide-react"
 
@@ -18,78 +17,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 
 import ChatList from "./ChatList"
-
-import z from "zod"
-import { useForm } from "react-hook-form"
-import type { SubmitHandler } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import Spinner from "../custom/Spinner"
-import { searchUser } from "@/services/user.service"
-
-import type { User } from "@/types/user"
-import SearchedUsers from "../custom/SearchedUsers"
-
-const addFriendSchema = z.object({
-  username: z
-    .string({
-      error: () => "Username is required.",
-    })
-    .trim()
-    .min(1, {
-      error: "Username must be at least 1 character.",
-    })
-    .max(30, {
-      error: "Username cannot exceed 30 characters.",
-    })
-    .regex(/^[a-zA-Z0-9_]+$/, {
-      error: "Username can only contain letters, numbers and underscores.",
-    }),
-})
-
-type AddFriendData = z.infer<typeof addFriendSchema>
+import PendingRequests from "../friends/PendingRequests"
+import AddFriend from "../friends/AddFriend"
 
 const ChatSidebar = () => {
-  const {
-    register,
-    handleSubmit,
-    clearErrors,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<AddFriendData>({
-    defaultValues: {
-      username: "",
-    },
-    resolver: zodResolver(addFriendSchema),
-    mode: "onChange",
-  })
-
-  const [users, setUsers] = useState<User[] | null>(null)
-  const [open, setOpen] = useState<boolean>(false)
-
-  const onSubmit: SubmitHandler<AddFriendData> = async (data) => {
-    clearErrors()
-    try {
-      const response = await searchUser(data.username)
-
-      if (response.status === 200) {
-        setUsers(response.data.users)
-
-        reset({
-          username: "",
-        })
-      }
-    } catch (error) {
-      console.log("Error in add friend component: ", error)
-    }
-  }
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>(false)
+  const [isPendingDialogOpen, setIsPendingDialogOpen] = useState<boolean>(false)
 
   return (
     <div className="flex h-full flex-col">
@@ -105,46 +40,32 @@ const ChatSidebar = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setOpen(true)}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setIsAddDialogOpen(true)}
+              >
                 Add friend
               </DropdownMenuItem>
-
-              <DropdownMenuItem>Pending requests</DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setIsPendingDialogOpen(true)}
+              >
+                Pending requests
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add a friend</DialogTitle>
-                <form onSubmit={handleSubmit(onSubmit)} className="mt-2">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      {...register("username")}
-                      type="text"
-                      placeholder="Search username"
-                    />
-                    <Button
-                      variant={"outline"}
-                      size={"icon"}
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="cursor-pointer"
-                    >
-                      {isSubmitting ? <Spinner /> : <SearchIcon size={18} />}
-                    </Button>
-                  </div>
-                  {errors.username && (
-                    <p className="mt-2 text-red-400">
-                      {errors.username.message}
-                    </p>
-                  )}
-                  {/* list searched users */}
-                  <SearchedUsers users={users} />
-                </form>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
+          {/* Add friend dialog */}
+          <AddFriend
+            isAddDialogOpen={isAddDialogOpen}
+            setIsAddDialogOpen={setIsAddDialogOpen}
+          />
+
+          {/* Pending requests dialog */}
+          <PendingRequests
+            isPendingDialogOpen={isPendingDialogOpen}
+            setIsPendingDialogOpen={setIsPendingDialogOpen}
+          />
         </div>
 
         <div className="relative">
