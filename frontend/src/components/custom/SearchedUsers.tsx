@@ -4,7 +4,7 @@ import SearchedUser from "./SearchedUser"
 
 const SearchedUsers = ({ users }: { users: User[] | null }) => {
   return (
-    <ul className="mt-2">
+    <ul className="mt-2 max-h-[50vh] scrollbar-none overflow-y-auto">
       {users === null
         ? null
         : users.length > 0

@@ -37,6 +37,13 @@ export const searchUser = async (
           {
             isEmailVerified: true,
           },
+          {
+            id: {
+              not: {
+                equals: req.user.id,
+              },
+            },
+          },
         ],
       },
       select: {
