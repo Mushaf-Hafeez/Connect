@@ -86,7 +86,7 @@ const Loginpage = () => {
         })
 
         toast.success("Login successful.")
-        navigate("/")
+        navigate("/chat")
       }
     } catch (error) {
       console.log("Error in login component: ", error)

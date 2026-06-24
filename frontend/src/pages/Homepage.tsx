@@ -4,6 +4,7 @@ import { logout } from "@/services/auth.service"
 import { userStore } from "@/zustand/userStore"
 import { useState } from "react"
 import toast from "react-hot-toast"
+import { Link } from "react-router-dom"
 import { useStore } from "zustand"
 
 const Homepage = () => {
@@ -44,7 +45,14 @@ const Homepage = () => {
           </Button>
         </div>
       ) : (
-        <h1 className="text-4xl">This is the Homepage of the website.</h1>
+        <div>
+          <h1 className="text-4xl">This is the Homepage of the website.</h1>
+          <Button asChild>
+            <Link to={"/login"} className="cursor-pointer">
+              Login
+            </Link>
+          </Button>
+        </div>
       )}
     </div>
   )

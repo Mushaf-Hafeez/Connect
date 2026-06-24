@@ -136,3 +136,19 @@
 @utility flex-center {
     @apply flex items-center justify-center;
   }
+
+/* Remove default browser styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+
+  -webkit-box-shadow: 0 0 0px 1000px var(--background) inset;
+  box-shadow: 0 0 0px 1000px var(--background) inset;
+
+  transition: background-color 9999s ease-in-out 0s;
+}

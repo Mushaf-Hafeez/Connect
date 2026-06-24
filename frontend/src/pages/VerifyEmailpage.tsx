@@ -59,7 +59,7 @@ const VerifyEmailpage = () => {
         })
 
         toast.success(response.data.message)
-        navigate("/")
+        navigate("/chat")
       }
     } catch (error) {
       console.log("Error in verify email page: ", error)

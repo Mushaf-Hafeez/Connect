@@ -6,8 +6,8 @@ export const searchUserValidation = z.object({
       error: () => "Username is required.",
     })
     .trim()
-    .min(3, {
-      error: "Username must be at least 3 characters.",
+    .min(1, {
+      error: "Username must be at least 1 character.",
     })
     .max(30, {
       error: "Username cannot exceed 30 characters.",
