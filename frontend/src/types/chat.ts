@@ -1,3 +1,5 @@
+import type { User } from "./user"
+
 export interface Chat {
   id: string
   name: string
@@ -12,4 +14,11 @@ export interface Message {
   text: string
   sender: "me" | "other"
   createdAt: string
+}
+
+export type Requester = Omit<User, "id">
+
+export interface PendingRequest {
+  id: string
+  requester: Requester
 }
