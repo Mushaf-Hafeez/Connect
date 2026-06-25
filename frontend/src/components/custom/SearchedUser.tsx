@@ -48,6 +48,7 @@ const SearchedUser = ({ user }: { user: User }) => {
         variant={"ghost"}
         size={"icon-lg"}
         className="cursor-pointer"
+        disabled={isSendingRequest}
       >
         {isSendingRequest ? <Spinner /> : <UserPlus />}
       </Button>

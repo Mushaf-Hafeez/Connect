@@ -22,3 +22,5 @@ export interface PendingRequest {
   id: string
   requester: Requester
 }
+
+export type Friend = User & { friendshipId: string }

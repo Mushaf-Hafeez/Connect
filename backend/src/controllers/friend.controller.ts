@@ -323,9 +323,14 @@ export const getFriends = async (
       },
     });
 
-    const friends = friendships.map((f) =>
-      f.requester.id === req.user.id ? f.receiver : f.requester,
-    );
+    const friends = friendships.map((f) => {
+      const friendData =
+        f.requester.id === req.user.id ? f.receiver : f.requester;
+      return {
+        friendshipId: f.id,
+        ...friendData,
+      };
+    });
 
     return res.status(200).json({
       success: true,

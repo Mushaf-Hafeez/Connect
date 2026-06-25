@@ -9,6 +9,8 @@ import {
 import { getPendingRequests } from "@/services/friend.service"
 import PendingRequestsList from "./PendingRequestsList"
 import type { PendingRequest } from "@/types/chat"
+import Spinner from "../custom/Spinner"
+import UserSkeleton from "../custom/UserSkeleton"
 
 interface PendingRequestsProps {
   isPendingDialogOpen: boolean
@@ -22,9 +24,10 @@ const PendingRequests = ({
   const [pendingRequests, setPendingRequests] = useState<
     PendingRequest[] | null
   >(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
+    if (!isPendingDialogOpen) return
     const fetchPendingRequests = async () => {
       setIsLoading(true)
 
@@ -42,19 +45,29 @@ const PendingRequests = ({
       }
     }
     fetchPendingRequests()
-  }, [pendingRequests])
+  }, [isPendingDialogOpen])
 
   return (
     <Dialog open={isPendingDialogOpen} onOpenChange={setIsPendingDialogOpen}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Pending requests</DialogTitle>
         </DialogHeader>
         {/* pending requests list */}
-        <PendingRequestsList
-          pendingRequests={pendingRequests}
-          setPendingRequests={setPendingRequests}
-        />
+        <div className="mt-4 h-80 scrollbar-none overflow-y-auto">
+          {isLoading ? (
+            <ul>
+              {Array.from({ length: 5 }).map((_, index) => (
+                <UserSkeleton key={index} />
+              ))}
+            </ul>
+          ) : (
+            <PendingRequestsList
+              pendingRequests={pendingRequests}
+              setPendingRequests={setPendingRequests}
+            />
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )
