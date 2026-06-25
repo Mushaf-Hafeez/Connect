@@ -42,7 +42,7 @@ const PendingRequests = ({
       }
     }
     fetchPendingRequests()
-  }, [pendingRequests])
+  }, [])
 
   return (
     <Dialog open={isPendingDialogOpen} onOpenChange={setIsPendingDialogOpen}>
