@@ -12,7 +12,7 @@ const PendingRequestsList = ({
   setPendingRequests,
 }: PendingRequestsListProps) => {
   return (
-    <ul className="mt-2 max-h-[50vh] scrollbar-none overflow-y-auto">
+    <ul className="mt-2">
       {pendingRequests === null
         ? null
         : pendingRequests.length > 0

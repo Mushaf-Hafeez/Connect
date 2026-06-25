@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { Dispatch, SetStateAction } from "react"
 
 import type { User } from "@/types/user"
@@ -20,6 +20,7 @@ import Spinner from "../custom/Spinner"
 import { SearchIcon } from "lucide-react"
 import SearchedUsers from "../custom/SearchedUsers"
 import { searchUser } from "@/services/user.service"
+import UserSkeleton from "../custom/UserSkeleton"
 
 const addFriendSchema = z.object({
   username: z
@@ -81,7 +82,7 @@ const AddFriend = ({ isAddDialogOpen, setIsAddDialogOpen }: AddFriendProps) => {
 
   return (
     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add a friend</DialogTitle>
           <form onSubmit={handleSubmit(onSubmit)} className="mt-2">
@@ -105,7 +106,17 @@ const AddFriend = ({ isAddDialogOpen, setIsAddDialogOpen }: AddFriendProps) => {
               <p className="mt-2 text-red-400">{errors.username.message}</p>
             )}
             {/* list searched users */}
-            <SearchedUsers users={users} />
+            <div className="mt-4 h-80 scrollbar-none overflow-y-auto">
+              {isSubmitting ? (
+                <ul className="space-y-2">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <UserSkeleton key={index} />
+                  ))}
+                </ul>
+              ) : (
+                <SearchedUsers users={users} />
+              )}
+            </div>
           </form>
         </DialogHeader>
       </DialogContent>

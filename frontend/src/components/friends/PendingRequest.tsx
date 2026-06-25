@@ -86,6 +86,7 @@ const PendingRequestItem = ({
           variant={"secondary"}
           size={"icon-lg"}
           className="cursor-pointer"
+          disabled={isCancelling}
         >
           {isCancelling ? <Spinner /> : <X size={18} />}
         </Button>
@@ -93,6 +94,7 @@ const PendingRequestItem = ({
           onClick={handleAccept}
           size={"icon-lg"}
           className="cursor-pointer"
+          disabled={isAccepting}
         >
           {isAccepting ? <Spinner /> : <Check size={18} />}
         </Button>

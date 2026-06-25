@@ -23,3 +23,15 @@ export const rejectFriendRequest = async (friendshipId: string) => {
   const response = await api.delete(`/friends/reject/${friendshipId}`)
   return response
 }
+
+// getFriends function
+export const getFriends = async () => {
+  const response = await api.get("/friends")
+  return response
+}
+
+// removeFriend function
+export const removeFriend = async (friendshipId: string) => {
+  const response = await api.delete(`/friends/remove/${friendshipId}`)
+  return response
+}

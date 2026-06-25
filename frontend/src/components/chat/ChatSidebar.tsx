@@ -21,10 +21,13 @@ import {
 import ChatList from "./ChatList"
 import PendingRequests from "../friends/PendingRequests"
 import AddFriend from "../friends/AddFriend"
+import ManageFriends from "../friends/ManageFriends"
 
 const ChatSidebar = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>(false)
   const [isPendingDialogOpen, setIsPendingDialogOpen] = useState<boolean>(false)
+  const [isManageFriendsDialogOpen, setIsManageFriendsDialogOpen] =
+    useState<boolean>(false)
 
   return (
     <div className="flex h-full flex-col">
@@ -52,6 +55,12 @@ const ChatSidebar = () => {
               >
                 Pending requests
               </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setIsManageFriendsDialogOpen(true)}
+              >
+                Manage friends
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -65,6 +74,12 @@ const ChatSidebar = () => {
           <PendingRequests
             isPendingDialogOpen={isPendingDialogOpen}
             setIsPendingDialogOpen={setIsPendingDialogOpen}
+          />
+
+          {/* Pending requests dialog */}
+          <ManageFriends
+            isManageFriendsDialogOpen={isManageFriendsDialogOpen}
+            setIsManageFriendsDialogOpen={setIsManageFriendsDialogOpen}
           />
         </div>
 
