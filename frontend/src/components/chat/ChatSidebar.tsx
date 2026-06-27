@@ -5,6 +5,8 @@ import {
   MessageCircle,
   Phone,
   Search,
+  UserCheck,
+  UserPlus,
   Users,
 } from "lucide-react"
 
@@ -44,21 +46,24 @@ const ChatSidebar = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem
-                className="cursor-pointer"
+                className="flex cursor-pointer items-center gap-2"
                 onClick={() => setIsAddDialogOpen(true)}
               >
+                <UserPlus size={18} />
                 Add friend
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="cursor-pointer"
+                className="flex cursor-pointer items-center gap-2"
                 onClick={() => setIsPendingDialogOpen(true)}
               >
+                <UserCheck size={18} />
                 Pending requests
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="cursor-pointer"
+                className="flex cursor-pointer items-center gap-2"
                 onClick={() => setIsManageFriendsDialogOpen(true)}
               >
+                <Users size={18} />
                 Manage friends
               </DropdownMenuItem>
             </DropdownMenuContent>
