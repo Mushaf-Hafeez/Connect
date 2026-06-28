@@ -13,6 +13,6 @@ import {
 
 conversationRoutes.post("/:userId", isAuth, conversation);
 conversationRoutes.get("/", isAuth, getConversations);
-conversationRoutes.post("/:id/messages", isAuth, getMessages);
+conversationRoutes.get("/:id/messages", isAuth, getMessages);
 
 export default conversationRoutes;
