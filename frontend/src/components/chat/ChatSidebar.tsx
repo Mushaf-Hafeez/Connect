@@ -121,7 +121,7 @@ const ChatSidebar = () => {
 
           <TabsContent
             value="chats"
-            className="mt-0 min-h-0 flex-1 overflow-y-auto"
+            className="mt-0 min-h-0 flex-1 scrollbar-none overflow-y-auto"
           >
             <ChatList />
           </TabsContent>
