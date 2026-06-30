@@ -3,6 +3,7 @@ import ChatHeader from "./ChatHeader"
 import MessageBubble from "./MessageBubble"
 import MessageInput from "./MessageInput"
 import type { Message } from "@/types/chat"
+import { useEffect } from "react"
 
 const messages: Message[] = [
   {
@@ -23,7 +24,6 @@ const ChatWindow = () => {
   const params = useParams()
 
   // Todo: fetch the conversation with params.id
-
   return (
     <div className="flex h-full flex-col">
       <ChatHeader />

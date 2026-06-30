@@ -1,10 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import type { Conversation } from "./ChatList"
-import toast from "react-hot-toast"
 import { useNavigate } from "react-router-dom"
+import { useStore } from "zustand"
+import { chatStore } from "@/zustand/chatStore"
 
 const ChatItem = ({ convo }: { convo: Conversation }) => {
+  const { setChatSelected } = useStore(chatStore)
+
   const participant = convo.participants[0]
   const user = participant.user
   const lastMessage = convo.messages.at(-1)
@@ -12,6 +15,7 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
   const navigate = useNavigate()
 
   const openChat = () => {
+    setChatSelected(true)
     navigate(`/chat/${convo.id}`)
   }
 
