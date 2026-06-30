@@ -34,15 +34,20 @@ const Homepage = () => {
       {user ? (
         <div className="space-y-2">
           <h1>Welcome, {user.username}</h1>
-          <Button
-            disabled={isLoading}
-            variant={"destructive"}
-            onClick={handleLogout}
-            className="cursor-pointer"
-          >
-            {isLoading && <Spinner />}
-            Logout
-          </Button>
+          <div className="space-x-2">
+            <Button asChild>
+              <Link to={"/chat"}>Open chat</Link>
+            </Button>
+            <Button
+              disabled={isLoading}
+              variant={"destructive"}
+              onClick={handleLogout}
+              className="cursor-pointer"
+            >
+              {isLoading && <Spinner />}
+              Logout
+            </Button>
+          </div>
         </div>
       ) : (
         <div>

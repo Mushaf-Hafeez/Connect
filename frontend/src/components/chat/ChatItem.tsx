@@ -1,15 +1,25 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import type { Conversation } from "./ChatList"
+import toast from "react-hot-toast"
+import { useNavigate } from "react-router-dom"
 
 const ChatItem = ({ convo }: { convo: Conversation }) => {
   const participant = convo.participants[0]
   const user = participant.user
-
   const lastMessage = convo.messages.at(-1)
 
+  const navigate = useNavigate()
+
+  const openChat = () => {
+    navigate(`/chat/${convo.id}`)
+  }
+
   return (
-    <div className="flex cursor-pointer items-center gap-3 border-b p-4 transition-colors hover:bg-muted">
+    <div
+      onClick={openChat}
+      className="flex cursor-pointer items-center gap-3 rounded-lg border-b p-4 transition-colors hover:bg-muted"
+    >
       <Avatar>
         <AvatarImage src={user.profilePic ?? undefined} />
         <AvatarFallback>

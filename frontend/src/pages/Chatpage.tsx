@@ -1,5 +1,6 @@
 import ChatSidebar from "@/components/chat/ChatSidebar"
 import ChatWindow from "@/components/chat/ChatWindow"
+import { Outlet } from "react-router-dom"
 
 const ChatPage = () => {
   return (
@@ -10,7 +11,8 @@ const ChatPage = () => {
         </div>
 
         <div className="flex-1">
-          <ChatWindow />
+          {/* <ChatWindow /> */}
+          <Outlet />
         </div>
       </div>
 
