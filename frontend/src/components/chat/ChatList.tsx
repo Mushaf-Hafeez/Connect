@@ -19,6 +19,8 @@ import { getFriends } from "@/services/friend.service"
 import UserSkeleton from "../custom/UserSkeleton"
 import ManageFriendsList from "../friends/ManageFriendsList"
 import ConversationList from "./ConversationList"
+import { useStore } from "zustand"
+import { conversationStore } from "@/zustand/conversationStore"
 
 type Participant = User & { lastReadAt: Date | null }
 
@@ -40,20 +42,11 @@ export interface Conversation {
 const ChatList = () => {
   const [search, setSearch] = useState<string>("")
   const [friends, setFriends] = useState<Friend[] | null>(null)
-  const [conversations, setConversations] = useState<Conversation[] | null>(
-    null
-  )
+  const { conversations, setConversations } = useStore(conversationStore)
   const [isFetching, setIsFetching] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [conversationDialogOpen, setConversationDialogOpen] =
     useState<boolean>(false)
-
-  const addConversation = () => {
-    // Todo
-    // 2. in the dialog fetch the user's friends and list them with skeleton loading
-    // 3. also add the search logic
-    // 4. add the onclick logic
-  }
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -63,7 +56,6 @@ const ChatList = () => {
 
         if (response.status === 200) {
           setConversations(response.data.conversations)
-          console.log(response.data.conversations)
         }
       } catch (error) {
         console.log("Error in the chat list component: ", error)

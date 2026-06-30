@@ -63,7 +63,14 @@ export const conversation = async (
       updatedAt: true,
       participants: {
         select: {
-          userId: true,
+          user: {
+            select: {
+              id: true,
+              displayName: true,
+              username: true,
+              profilePic: true,
+            },
+          },
           lastReadAt: true,
           joinedAt: true,
         },
@@ -142,6 +149,7 @@ export const getConversations = async (
               },
             },
             lastReadAt: true,
+            joinedAt: true,
           },
         },
         messages: {
