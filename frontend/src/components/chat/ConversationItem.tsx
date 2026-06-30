@@ -5,6 +5,8 @@ import { Button } from "../ui/button"
 import { Plus } from "lucide-react"
 import Spinner from "../custom/Spinner"
 import { createConversation } from "@/services/conversation.service"
+import { useStore } from "zustand"
+import { conversationStore } from "@/zustand/conversationStore"
 
 interface FriendItemProps {
   friend: Friend
@@ -18,6 +20,7 @@ const ConversationItem = ({
   const { displayName, username, profilePic, id } = friend
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { addConversation } = useStore(conversationStore)
 
   const handleAddConversation = async () => {
     setIsLoading(true)
@@ -25,6 +28,14 @@ const ConversationItem = ({
       const response = await createConversation(id)
 
       if (response.status === 201 || response.status === 200) {
+        const conversation = {
+          ...response.data.conversation,
+          participants: response.data.conversation.participants.filter(
+            (participant: { user: { id: string } }) => participant.user.id === id,
+          ),
+          messages: response.data.conversation.messages ?? [],
+        }
+        addConversation(conversation)
         setConversationDialogOpen(false)
       }
     } catch (error) {
