@@ -9,10 +9,24 @@ import {
   conversation,
   getConversations,
   getMessages,
+  sendMessage,
+  updateMessage,
+  deleteMessage,
 } from "../controllers/conversations.controller.js";
 
 conversationRoutes.post("/:userId", isAuth, conversation);
 conversationRoutes.get("/", isAuth, getConversations);
-conversationRoutes.get("/:id/messages", isAuth, getMessages);
+conversationRoutes.get("/:conversationId/messages", isAuth, getMessages);
+conversationRoutes.post("/:conversationId/messages", isAuth, sendMessage);
+conversationRoutes.put(
+  "/:conversationId/messages/:messageId",
+  isAuth,
+  updateMessage,
+);
+conversationRoutes.delete(
+  "/:conversationId/messages/:messageId",
+  isAuth,
+  deleteMessage,
+);
 
 export default conversationRoutes;

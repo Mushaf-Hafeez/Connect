@@ -197,7 +197,7 @@ export const getMessages = async (
       throw new AppError(400, "Validation failed.");
     }
 
-    const { id } = result.data;
+    const { conversationId } = result.data;
 
     const page = Number(req.query.page) || 1;
     const take = Number(req.query.take) || 20;
@@ -207,7 +207,7 @@ export const getMessages = async (
       where: {
         userId_conversationId: {
           userId: req.user.id,
-          conversationId: id,
+          conversationId,
         },
       },
     });
@@ -218,7 +218,7 @@ export const getMessages = async (
 
     const messages = await prisma.message.findMany({
       where: {
-        conversationId: id,
+        conversationId,
       },
       select: {
         id: true,
@@ -248,7 +248,7 @@ export const getMessages = async (
 
     const totalMessages = await prisma.message.count({
       where: {
-        conversationId: id,
+        conversationId,
       },
     });
 
@@ -259,6 +259,48 @@ export const getMessages = async (
       messages,
       hasMore,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             sendMessage controller
+// ======================================================
+export const sendMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             updateMessage controller
+// ======================================================
+export const updateMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             deleteMessage controller
+// ======================================================
+export const deleteMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
   } catch (error) {
     next(error);
   }

@@ -5,5 +5,5 @@ export const createConversationValidation = z.object({
 });
 
 export const conversationIdValidation = z.object({
-  id: z.uuid("Invalid id."),
+  conversationId: z.uuid("Invalid id."),
 });
