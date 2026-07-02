@@ -25,6 +25,8 @@ import ChatList from "./ChatList"
 import PendingRequests from "../friends/PendingRequests"
 import AddFriend from "../friends/AddFriend"
 import ManageFriends from "../friends/ManageFriends"
+import { useStore } from "zustand"
+import { chatStore } from "@/zustand/chatStore"
 
 interface Tab {
   id: number
@@ -62,7 +64,7 @@ const ChatSidebar = () => {
 
   return (
     <>
-      <div className="flex h-full flex-col">
+      <div className="flex h-full w-full flex-col lg:border-r">
         {/* Header */}
         <div className="border-b p-4">
           <div className="mb-4 flex items-center justify-between">
@@ -140,22 +142,22 @@ const ChatSidebar = () => {
             calls tab
           </TabsContent>
         </Tabs>
+
+        <AddFriend
+          isAddDialogOpen={isAddDialogOpen}
+          setIsAddDialogOpen={setIsAddDialogOpen}
+        />
+
+        <PendingRequests
+          isPendingDialogOpen={isPendingDialogOpen}
+          setIsPendingDialogOpen={setIsPendingDialogOpen}
+        />
+
+        <ManageFriends
+          isManageFriendsDialogOpen={isManageFriendsDialogOpen}
+          setIsManageFriendsDialogOpen={setIsManageFriendsDialogOpen}
+        />
       </div>
-
-      <AddFriend
-        isAddDialogOpen={isAddDialogOpen}
-        setIsAddDialogOpen={setIsAddDialogOpen}
-      />
-
-      <PendingRequests
-        isPendingDialogOpen={isPendingDialogOpen}
-        setIsPendingDialogOpen={setIsPendingDialogOpen}
-      />
-
-      <ManageFriends
-        isManageFriendsDialogOpen={isManageFriendsDialogOpen}
-        setIsManageFriendsDialogOpen={setIsManageFriendsDialogOpen}
-      />
     </>
   )
 }

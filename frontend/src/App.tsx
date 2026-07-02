@@ -11,6 +11,8 @@ import ResetPasswordpage from "./pages/ResetPasswordpage"
 import Chatpage from "./pages/Chatpage"
 
 import ProtectedRoute from "./components/custom/ProtectedRoute"
+import DefaultChatpage from "./pages/DefaultChatpage"
+import ChatWindow from "./components/chat/ChatWindow"
 
 const App = () => {
   return (
@@ -29,7 +31,10 @@ const App = () => {
               <Chatpage />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<DefaultChatpage />} />
+          <Route path=":id" element={<ChatWindow />} />
+        </Route>
         <Route path="*" element={<Errorpage />} />
       </Routes>
     </main>

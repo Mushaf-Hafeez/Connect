@@ -89,7 +89,7 @@ const ChatList = () => {
   }, [conversationDialogOpen])
 
   return (
-    <div className="relative h-full flex-1 p-4">
+    <div className="relative h-full flex-1 px-4">
       {!isFetching && (
         <Dialog
           open={conversationDialogOpen}
