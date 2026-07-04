@@ -13,3 +13,8 @@ export const updateMessageValidation = z.object({
   messageId: z.uuid("Invalid message id."),
   text: z.string().trim().min(1, "text cannot be empty."),
 });
+
+export const deleteMessageValidation = z.object({
+  conversationId: z.uuid("Invalid conversation id."),
+  messageId: z.uuid("Invalid message id."),
+});

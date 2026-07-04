@@ -6,6 +6,7 @@ import AppError from "../utils/AppError.js";
 import {
   conversationIdValidation,
   createConversationValidation,
+  deleteMessageValidation,
   updateMessageValidation,
 } from "../validations/conversation.validation.js";
 import { success } from "zod";
@@ -378,10 +379,12 @@ export const updateMessage = async (
 
     const { conversationId, messageId, text } = result.data;
 
-    const participant = await prisma.conversationParticipant.findFirst({
+    const participant = await prisma.conversationParticipant.findUnique({
       where: {
-        conversationId,
-        userId: req.user.id,
+        userId_conversationId: {
+          conversationId,
+          userId: req.user.id,
+        },
       },
     });
 
@@ -452,6 +455,63 @@ export const deleteMessage = async (
   next: NextFunction,
 ) => {
   try {
+    // validation
+    const result = deleteMessageValidation.safeParse(req.params);
+
+    // handling validation error
+    if (!result.success) {
+      throw new AppError(
+        400,
+        "Validation failed.",
+        formatZodErrors(result.error),
+      );
+    }
+
+    const { conversationId, messageId } = result.data;
+
+    const participant = await prisma.conversationParticipant.findUnique({
+      where: {
+        userId_conversationId: {
+          conversationId,
+          userId: req.user.id,
+        },
+      },
+    });
+
+    if (!participant) {
+      throw new AppError(
+        403,
+        "You are not a participant of this conversation.",
+      );
+    }
+
+    const message = await prisma.message.findUnique({
+      where: {
+        id: messageId,
+      },
+      include: {
+        sender: true,
+      },
+    });
+
+    if (!message) {
+      throw new AppError(404, "Message not found.");
+    }
+
+    if (message.sender.id !== req.user.id) {
+      throw new AppError(403, "You are not authorized to delete the message.");
+    }
+
+    await prisma.message.delete({
+      where: {
+        id: messageId,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Message deleted.",
+    });
   } catch (error) {
     next(error);
   }
