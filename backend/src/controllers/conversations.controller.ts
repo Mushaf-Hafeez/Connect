@@ -6,8 +6,11 @@ import AppError from "../utils/AppError.js";
 import {
   conversationIdValidation,
   createConversationValidation,
+  deleteMessageValidation,
+  updateMessageValidation,
 } from "../validations/conversation.validation.js";
 import { success } from "zod";
+import { formatZodErrors } from "../utils/helper.js";
 
 // ======================================================
 //             conversation controller
@@ -197,7 +200,7 @@ export const getMessages = async (
       throw new AppError(400, "Validation failed.");
     }
 
-    const { id } = result.data;
+    const { conversationId } = result.data;
 
     const page = Number(req.query.page) || 1;
     const take = Number(req.query.take) || 20;
@@ -207,7 +210,7 @@ export const getMessages = async (
       where: {
         userId_conversationId: {
           userId: req.user.id,
-          conversationId: id,
+          conversationId,
         },
       },
     });
@@ -218,7 +221,7 @@ export const getMessages = async (
 
     const messages = await prisma.message.findMany({
       where: {
-        conversationId: id,
+        conversationId,
       },
       select: {
         id: true,
@@ -248,7 +251,7 @@ export const getMessages = async (
 
     const totalMessages = await prisma.message.count({
       where: {
-        conversationId: id,
+        conversationId,
       },
     });
 
@@ -258,6 +261,256 @@ export const getMessages = async (
       success: true,
       messages,
       hasMore,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             sendMessage controller
+// ======================================================
+export const sendMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // validation
+    const result = conversationIdValidation.safeParse(req.params);
+
+    // handling validation error
+    if (!result.success) {
+      throw new AppError(400, "Validation failed.");
+    }
+
+    const { conversationId } = result.data;
+
+    if (req.files?.length === 0 && req.body.text.trim() === "") {
+      throw new AppError(
+        400,
+        "Cannot send an empty text. Provide text or attachments.",
+      );
+    }
+
+    const files = (req.files as Express.Multer.File[]) || [];
+    let attachments: string[] = [];
+
+    if (files.length > 0) {
+      files.map((file) => attachments.push(file.path));
+    }
+
+    const participant = await prisma.conversationParticipant.findUnique({
+      where: {
+        userId_conversationId: {
+          conversationId,
+          userId: req.user.id,
+        },
+      },
+    });
+
+    if (!participant) {
+      throw new AppError(
+        403,
+        "You are not a participant of this conversation.",
+      );
+    }
+
+    const message = await prisma.message.create({
+      data: {
+        conversationId,
+        text: req.body.text,
+        attachments,
+        senderId: req.user.id,
+      },
+      select: {
+        id: true,
+        text: true,
+        attachments: true,
+        sender: {
+          select: {
+            id: true,
+            displayName: true,
+            username: true,
+            profilePic: true,
+          },
+        },
+        statuses: {
+          select: {
+            userId: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             updateMessage controller
+// ======================================================
+export const updateMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // validation
+    const result = updateMessageValidation.safeParse({
+      ...req.params,
+      ...req.body,
+    });
+
+    // handling validation error
+    if (!result.success) {
+      throw new AppError(
+        400,
+        "Validation failed.",
+        formatZodErrors(result.error),
+      );
+    }
+
+    const { conversationId, messageId, text } = result.data;
+
+    const participant = await prisma.conversationParticipant.findUnique({
+      where: {
+        userId_conversationId: {
+          conversationId,
+          userId: req.user.id,
+        },
+      },
+    });
+
+    if (!participant) {
+      throw new AppError(
+        403,
+        "You are not a participant of this conversation.",
+      );
+    }
+
+    const message = await prisma.message.findUnique({
+      where: {
+        id: messageId,
+      },
+    });
+
+    if (!message) {
+      throw new AppError(404, "Message not found.");
+    }
+
+    if (message.senderId !== req.user.id) {
+      throw new AppError(403, "You are not authorized to update the message.");
+    }
+
+    const updatedMessage = await prisma.message.update({
+      where: {
+        id: messageId,
+      },
+      data: {
+        text,
+      },
+      select: {
+        id: true,
+        text: true,
+        attachments: true,
+        sender: {
+          select: {
+            id: true,
+            displayName: true,
+            username: true,
+            profilePic: true,
+          },
+        },
+        statuses: {
+          select: {
+            userId: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      updatedMessage,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
+//             deleteMessage controller
+// ======================================================
+export const deleteMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // validation
+    const result = deleteMessageValidation.safeParse(req.params);
+
+    // handling validation error
+    if (!result.success) {
+      throw new AppError(
+        400,
+        "Validation failed.",
+        formatZodErrors(result.error),
+      );
+    }
+
+    const { conversationId, messageId } = result.data;
+
+    const participant = await prisma.conversationParticipant.findUnique({
+      where: {
+        userId_conversationId: {
+          conversationId,
+          userId: req.user.id,
+        },
+      },
+    });
+
+    if (!participant) {
+      throw new AppError(
+        403,
+        "You are not a participant of this conversation.",
+      );
+    }
+
+    const message = await prisma.message.findUnique({
+      where: {
+        id: messageId,
+      },
+      include: {
+        sender: true,
+      },
+    });
+
+    if (!message) {
+      throw new AppError(404, "Message not found.");
+    }
+
+    if (message.sender.id !== req.user.id) {
+      throw new AppError(403, "You are not authorized to delete the message.");
+    }
+
+    await prisma.message.delete({
+      where: {
+        id: messageId,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Message deleted.",
     });
   } catch (error) {
     next(error);
