@@ -6,8 +6,10 @@ import AppError from "../utils/AppError.js";
 import {
   conversationIdValidation,
   createConversationValidation,
+  updateMessageValidation,
 } from "../validations/conversation.validation.js";
 import { success } from "zod";
+import { formatZodErrors } from "../utils/helper.js";
 
 // ======================================================
 //             conversation controller
@@ -273,6 +275,78 @@ export const sendMessage = async (
   next: NextFunction,
 ) => {
   try {
+    // validation
+    const result = conversationIdValidation.safeParse(req.params);
+
+    // handling validation error
+    if (!result.success) {
+      throw new AppError(400, "Validation failed.");
+    }
+
+    const { conversationId } = result.data;
+
+    if (req.files?.length === 0 && req.body.text.trim() === "") {
+      throw new AppError(
+        400,
+        "Cannot send an empty text. Provide text or attachments.",
+      );
+    }
+
+    const files = (req.files as Express.Multer.File[]) || [];
+    let attachments: string[] = [];
+
+    if (files.length > 0) {
+      files.map((file) => attachments.push(file.path));
+    }
+
+    const participant = await prisma.conversationParticipant.findUnique({
+      where: {
+        userId_conversationId: {
+          conversationId,
+          userId: req.user.id,
+        },
+      },
+    });
+
+    if (!participant) {
+      throw new AppError(
+        403,
+        "You are not a participant of this conversation.",
+      );
+    }
+
+    const message = await prisma.message.create({
+      data: {
+        conversationId,
+        text: req.body.text,
+        attachments,
+        senderId: req.user.id,
+      },
+      select: {
+        id: true,
+        text: true,
+        attachments: true,
+        sender: {
+          select: {
+            id: true,
+            displayName: true,
+            username: true,
+            profilePic: true,
+          },
+        },
+        statuses: {
+          select: {
+            userId: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message,
+    });
   } catch (error) {
     next(error);
   }
@@ -287,6 +361,83 @@ export const updateMessage = async (
   next: NextFunction,
 ) => {
   try {
+    // validation
+    const result = updateMessageValidation.safeParse({
+      ...req.params,
+      ...req.body,
+    });
+
+    // handling validation error
+    if (!result.success) {
+      throw new AppError(
+        400,
+        "Validation failed.",
+        formatZodErrors(result.error),
+      );
+    }
+
+    const { conversationId, messageId, text } = result.data;
+
+    const participant = await prisma.conversationParticipant.findFirst({
+      where: {
+        conversationId,
+        userId: req.user.id,
+      },
+    });
+
+    if (!participant) {
+      throw new AppError(
+        403,
+        "You are not a participant of this conversation.",
+      );
+    }
+
+    const message = await prisma.message.findUnique({
+      where: {
+        id: messageId,
+      },
+    });
+
+    if (!message) {
+      throw new AppError(404, "Message not found.");
+    }
+
+    if (message.senderId !== req.user.id) {
+      throw new AppError(403, "You are not authorized to update the message.");
+    }
+
+    const updatedMessage = await prisma.message.update({
+      where: {
+        id: messageId,
+      },
+      data: {
+        text,
+      },
+      select: {
+        id: true,
+        text: true,
+        attachments: true,
+        sender: {
+          select: {
+            id: true,
+            displayName: true,
+            username: true,
+            profilePic: true,
+          },
+        },
+        statuses: {
+          select: {
+            userId: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      updatedMessage,
+    });
   } catch (error) {
     next(error);
   }
