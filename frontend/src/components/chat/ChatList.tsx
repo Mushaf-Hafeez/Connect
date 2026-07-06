@@ -22,7 +22,10 @@ import ConversationList from "./ConversationList"
 import { useStore } from "zustand"
 import { conversationStore } from "@/zustand/conversationStore"
 
-type Participant = User & { lastReadAt: Date | null }
+export type Participant = {
+  user: User
+   lastReadAt: Date | null
+}
 
 interface Message {
   id: string

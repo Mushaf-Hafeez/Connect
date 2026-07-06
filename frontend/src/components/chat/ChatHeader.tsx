@@ -1,28 +1,26 @@
 import { MoreVertical, Phone, Video } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useStore } from "zustand"
+import { chatStore } from "@/zustand/chatStore"
 
-interface ChatHeaderProps {
-  name?: string
-  image?: string
-  isOnline?: boolean
-}
+const ChatHeader = () => {
+  const { chatSelected } = useStore(chatStore)
 
-const ChatHeader = ({
-  name = "Sarah Jenkins",
-  image,
-  isOnline = true,
-}: ChatHeaderProps) => {
+  const { displayName, profilePic } = chatSelected.user
+
+  const isOnline = true
+
   return (
     <header className="flex h-16 items-center justify-between border-b px-4">
       <div className="flex items-center gap-3">
         <Avatar>
-          <AvatarImage src={image} />
-          <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+          <AvatarImage src={profilePic} />
+          <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
 
         <div>
-          <h2 className="font-medium">{name}</h2>
+          <h2 className="font-medium">{displayName}</h2>
 
           <p
             className={`text-xs ${

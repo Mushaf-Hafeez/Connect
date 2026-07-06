@@ -6,7 +6,7 @@ import { useStore } from "zustand"
 import { chatStore } from "@/zustand/chatStore"
 
 const ChatItem = ({ convo }: { convo: Conversation }) => {
-  const { setChatSelected } = useStore(chatStore)
+  const { setIsChatSelected, setChatSelected } = useStore(chatStore)
 
   const participant = convo.participants[0]
   const user = participant.user
@@ -15,7 +15,8 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
   const navigate = useNavigate()
 
   const openChat = () => {
-    setChatSelected(true)
+    setIsChatSelected(true)
+    setChatSelected(participant)
     navigate(`/chat/${convo.id}`)
   }
 

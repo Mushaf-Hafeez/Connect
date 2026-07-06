@@ -1,11 +1,15 @@
 import type { Message } from "@/types/chat"
+import { userStore } from "@/zustand/userStore"
+import { useStore } from "zustand/react"
 
 interface MessageBubbleProps {
   message: Message
 }
 
 const MessageBubble = ({ message }: MessageBubbleProps) => {
-  const isMe = message.sender === "me"
+  const { user } = useStore(userStore)
+
+  const isMe = message.sender.id === user.id
 
   return (
     <div className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
@@ -15,6 +19,18 @@ const MessageBubble = ({ message }: MessageBubbleProps) => {
         }`}
       >
         {message.text}
+        {message.attachments.length > 0 && (
+          <div className="mt-2">
+            {message.attachments.map((attachment, index) => (
+              <img
+                key={index}
+                src={attachment}
+                alt={`Attachment ${index}`}
+                className="max-h-48 max-w-full rounded-lg border"
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
