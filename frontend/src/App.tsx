@@ -19,7 +19,7 @@ import { useEffect } from "react"
 import { checkAuth } from "./services/auth.service"
 
 const App = () => {
-  const { user, setUser, clearUser } = useStore(userStore)
+  const { setUser, clearUser } = useStore(userStore)
 
   const navigate = useNavigate()
 
