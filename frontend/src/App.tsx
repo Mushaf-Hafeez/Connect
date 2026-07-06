@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useNavigate } from "react-router-dom"
 
 // importing pages
 import Homepage from "./pages/Homepage"
@@ -13,8 +13,34 @@ import Chatpage from "./pages/Chatpage"
 import ProtectedRoute from "./components/custom/ProtectedRoute"
 import DefaultChatpage from "./pages/DefaultChatpage"
 import ChatWindow from "./components/chat/ChatWindow"
+import { useStore } from "zustand"
+import { userStore } from "./zustand/userStore"
+import { useEffect } from "react"
+import { checkAuth } from "./services/auth.service"
 
 const App = () => {
+  const { user, setUser, clearUser } = useStore(userStore)
+
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      try {
+        const response = await checkAuth()
+
+        if (response.status === 200) {
+          setUser(response.data.user)
+        }
+      } catch (error) {
+        console.log("Error in the app component: ", error)
+        clearUser()
+        navigate("/")
+      }
+    }
+
+    checkAuthentication()
+  }, [setUser, clearUser])
+
   return (
     <main>
       <Routes>

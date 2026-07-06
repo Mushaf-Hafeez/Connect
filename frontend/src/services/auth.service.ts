@@ -64,3 +64,9 @@ export const logout = () => {
   const response = api.get("/auth/logout")
   return response
 }
+
+// checkAuth function
+export const checkAuth = async () => {
+  const response = await api.get("/auth/check-auth")
+  return response
+}
