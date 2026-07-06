@@ -1,11 +1,28 @@
 import { useParams } from "react-router-dom"
 import ChatHeader from "./ChatHeader"
-import MessageBubble from "./MessageBubble"
 import MessageInput from "./MessageInput"
 import type { Message } from "@/types/chat"
 import { useEffect, useState } from "react"
 import { getMessages } from "@/services/conversation.service"
 import Spinner from "../custom/Spinner"
+import {
+  Message as MessagePrimitive,
+  MessageAvatar,
+  MessageContent,
+} from "@/components/ui/message"
+import { Bubble, BubbleContent } from "@/components/ui/bubble"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from "@/components/ui/message-scroller"
+import { userStore } from "@/zustand/userStore"
+import { useStore } from "zustand/react"
+import MessageBubble from "./MessageBubble"
 
 const ChatWindow = () => {
   const [messages, setMessages] = useState<Message[]>([])
@@ -13,8 +30,8 @@ const ChatWindow = () => {
 
   const params = useParams()
   const id = params.id
+  const { user } = useStore(userStore)
 
-  // Todo: fetch the conversation with params.id
   useEffect(() => {
     const fetchMessages = async () => {
       setIsLoading(true)
@@ -22,7 +39,6 @@ const ChatWindow = () => {
         const response = await getMessages(id as string)
 
         if (response.status === 200) {
-          console.log("Fetched messages:", response.data.messages)
           setMessages(response.data.messages)
         }
       } catch (error) {
@@ -39,15 +55,29 @@ const ChatWindow = () => {
     <div className="flex h-full flex-col">
       <ChatHeader />
 
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+      <div className="min-h-0 flex-1 p-4">
         {isLoading ? (
           <Spinner />
         ) : messages.length === 0 ? (
-          "No messages yet"
+          <div className="text-sm text-muted-foreground">No messages yet</div>
         ) : (
-          messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
-          ))
+          <MessageScrollerProvider autoScroll>
+            <MessageScroller>
+              <MessageScrollerViewport>
+                <MessageScrollerContent>
+                  {messages.map((message) => (
+                    <MessageScrollerItem
+                      key={message.id}
+                      messageId={message.id}
+                    >
+                      <MessageBubble message={message} />
+                    </MessageScrollerItem>
+                  ))}
+                </MessageScrollerContent>
+              </MessageScrollerViewport>
+              <MessageScrollerButton />
+            </MessageScroller>
+          </MessageScrollerProvider>
         )}
       </div>
 

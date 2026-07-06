@@ -1,38 +1,87 @@
-import type { Message } from "@/types/chat"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Bubble, BubbleContent } from "@/components/ui/bubble"
+import { Message, MessageAvatar, MessageContent } from "@/components/ui/message"
+import type { Message as MessageType } from "@/types/chat"
 import { userStore } from "@/zustand/userStore"
-import { useStore } from "zustand/react"
+import { useStore } from "zustand"
 
-interface MessageBubbleProps {
-  message: Message
-}
+import {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentContent,
+  AttachmentDescription,
+  AttachmentMedia,
+  AttachmentTitle,
+} from "@/components/ui/attachment"
+import { DownloadIcon, FileTextIcon } from "lucide-react"
+import toast from "react-hot-toast"
 
-const MessageBubble = ({ message }: MessageBubbleProps) => {
+const MessageBubble = ({ message }: { message: MessageType }) => {
   const { user } = useStore(userStore)
+
+  const { displayName, profilePic } = message.sender
+  const text = message.text
+  const attachments = message.attachments
 
   const isMe = message.sender.id === user.id
 
+  const handleDownload = (url: string) => {
+    const anchor = document.createElement("a")
+    anchor.href = url
+    anchor.download = new Date().toISOString()
+
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+  }
+
   return (
-    <div className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
-          isMe ? "bg-primary text-primary-foreground" : "border bg-background"
-        }`}
-      >
-        {message.text}
-        {message.attachments.length > 0 && (
-          <div className="mt-2">
-            {message.attachments.map((attachment, index) => (
-              <img
-                key={index}
-                src={attachment}
-                alt={`Attachment ${index}`}
-                className="max-h-48 max-w-full rounded-lg border"
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    <Message align={isMe ? "end" : "start"} variant="ghost">
+      <MessageAvatar>
+        <Avatar>
+          <AvatarImage src={profilePic} />
+          <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
+        </Avatar>
+      </MessageAvatar>
+      <MessageContent>
+        <Bubble variant={"ghost"}>
+          {text && <BubbleContent>{text}</BubbleContent>}
+
+          {attachments && attachments.length > 0 && (
+            <BubbleContent className="mt-2">
+              {attachments.map((file, index) => (
+                <Attachment key={index} orientation="horizontal">
+                  <AttachmentMedia>
+                    <FileTextIcon />
+                  </AttachmentMedia>
+                  <AttachmentContent>
+                    <AttachmentTitle>Download the file</AttachmentTitle>
+                    <AttachmentDescription>
+                      No preview available
+                    </AttachmentDescription>
+                    <img src={file} className="hidden" />
+                  </AttachmentContent>
+                  <AttachmentActions>
+                    <AttachmentAction
+                      type="button"
+                      title="Download"
+                      aria-label="Download"
+                      size="icon-lg"
+                      variant="secondary"
+                      onClick={() => handleDownload(file)}
+                    >
+                      <DownloadIcon />
+                    </AttachmentAction>
+                  </AttachmentActions>
+                </Attachment>
+              ))}
+            </BubbleContent>
+          )}
+        </Bubble>
+      </MessageContent>
+    </Message>
   )
 }
+
 export default MessageBubble
