@@ -5,11 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Spinner from "../custom/Spinner"
+import { sendMessage } from "@/services/conversation.service"
+import { useParams } from "react-router-dom"
 
 const MessageInput = () => {
   const [message, setMessage] = useState("")
   const [attachments, setAttachments] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const params = useParams()
 
   const previews = useMemo(() => {
     return attachments.map((file) => ({
@@ -41,7 +45,7 @@ const MessageInput = () => {
 
       const formData = new FormData()
 
-      formData.append("message", message)
+      formData.append("text", message)
 
       attachments.forEach((file) => {
         formData.append("attachments", file)
@@ -53,9 +57,13 @@ const MessageInput = () => {
       })
 
       // make the api call to the backend
+      const response = await sendMessage(params.id as string, formData)
 
-      setMessage("")
-      setAttachments([])
+      if (response.status === 201) {
+        console.log("Message sent successfully:", response.data)
+        setMessage("")
+        setAttachments([])
+      }
     } catch (error) {
       console.log("Error in message input component: ", error)
     } finally {

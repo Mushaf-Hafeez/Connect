@@ -9,11 +9,18 @@ export interface Chat {
   avatar?: string
 }
 
+export type MessageStatus = "SENT" | "DELIVERED" | "READ"
+
+export interface MessageStatusInfo {
+  userId: string
+  status: MessageStatus
+}
 export interface Message {
   id: string
-  text: string
-  sender: "me" | "other"
-  createdAt: string
+  text: string | null
+  attachments: string[]
+  sender: User
+  statuses: MessageStatusInfo[]
 }
 
 export type Requester = Omit<User, "id">
