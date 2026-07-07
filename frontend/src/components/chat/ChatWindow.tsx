@@ -55,7 +55,7 @@ const ChatWindow = () => {
     <div className="flex h-full flex-col">
       <ChatHeader />
 
-      <div className="min-h-0 flex-1 p-4">
+      <div className="min-h-0 flex-1 scrollbar-none p-4">
         {isLoading ? (
           <Spinner />
         ) : messages.length === 0 ? (
@@ -63,7 +63,7 @@ const ChatWindow = () => {
         ) : (
           <MessageScrollerProvider autoScroll>
             <MessageScroller>
-              <MessageScrollerViewport>
+              <MessageScrollerViewport className="scrollbar-none">
                 <MessageScrollerContent>
                   {messages.map((message) => (
                     <MessageScrollerItem

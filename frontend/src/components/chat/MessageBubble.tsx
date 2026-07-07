@@ -15,7 +15,11 @@ import {
   AttachmentTitle,
 } from "@/components/ui/attachment"
 import { DownloadIcon, FileTextIcon } from "lucide-react"
-import toast from "react-hot-toast"
+import { getFileType } from "@/utils/util"
+import AttachedVideo from "../attachment/AttachedVideo"
+import AttachedImage from "../attachment/AttachedImage"
+import AttachedFile from "../attachment/AttachedFile"
+import { Link } from "react-router-dom"
 
 const MessageBubble = ({ message }: { message: MessageType }) => {
   const { user } = useStore(userStore)
@@ -27,55 +31,53 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
   const isMe = message.sender.id === user.id
 
   const handleDownload = (url: string) => {
-    const anchor = document.createElement("a")
-    anchor.href = url
-    anchor.download = new Date().toISOString()
-
-    document.body.appendChild(anchor)
-    anchor.click()
-    document.body.removeChild(anchor)
+    window.open(url, "_blank")
   }
 
   return (
-    <Message align={isMe ? "end" : "start"} variant="ghost">
-      <MessageAvatar>
+    <Message className="flex items-center" align={isMe ? "end" : "start"}>
+      <MessageAvatar className="self-start">
         <Avatar>
           <AvatarImage src={profilePic} />
           <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
       </MessageAvatar>
       <MessageContent>
-        <Bubble variant={"ghost"}>
+        <Bubble variant={"outline"}>
           {text && <BubbleContent>{text}</BubbleContent>}
 
           {attachments && attachments.length > 0 && (
             <BubbleContent className="mt-2">
-              {attachments.map((file, index) => (
-                <Attachment key={index} orientation="horizontal">
-                  <AttachmentMedia>
-                    <FileTextIcon />
-                  </AttachmentMedia>
-                  <AttachmentContent>
-                    <AttachmentTitle>Download the file</AttachmentTitle>
-                    <AttachmentDescription>
-                      No preview available
-                    </AttachmentDescription>
-                    <img src={file} className="hidden" />
-                  </AttachmentContent>
-                  <AttachmentActions>
-                    <AttachmentAction
-                      type="button"
-                      title="Download"
-                      aria-label="Download"
-                      size="icon-lg"
-                      variant="secondary"
-                      onClick={() => handleDownload(file)}
-                    >
-                      <DownloadIcon />
-                    </AttachmentAction>
-                  </AttachmentActions>
-                </Attachment>
-              ))}
+              {attachments.map((file, index) => {
+                const fileTypes = file.split(".")
+                const fileType = fileTypes[fileTypes.length - 1]
+
+                const type = getFileType(fileType)
+
+                if (type === "image") {
+                  return (
+                    <AttachedImage
+                      key={index}
+                      link={file}
+                      fileType={fileType}
+                    />
+                  )
+                }
+
+                if (type === "video") {
+                  return (
+                    <AttachedVideo
+                      key={index}
+                      link={file}
+                      fileType={fileType}
+                    />
+                  )
+                }
+
+                return (
+                  <AttachedFile key={index} link={file} fileType={fileType} />
+                )
+              })}
             </BubbleContent>
           )}
         </Bubble>
