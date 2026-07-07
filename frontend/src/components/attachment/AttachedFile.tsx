@@ -8,7 +8,18 @@ type AttachedFileProps = {
   fileType: string
 }
 const AttachedFile = ({ link, fileType }: AttachedFileProps) => {
-  // Todo: add download logic
+  const handleDownloadFile = () => {
+    const anchor = document.createElement("a")
+
+    anchor.href = link
+    anchor.download = `DOC${Date.now()}.${fileType}`
+    anchor.target = "_blank"
+
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+  }
+
   return (
     <Attachment className="relative w-72">
       <AttachmentContent className="flex items-center gap-3 rounded-lg border p-2">
@@ -21,7 +32,12 @@ const AttachedFile = ({ link, fileType }: AttachedFileProps) => {
           <p className="text-xs text-muted-foreground">PDF Document</p>
         </div>
 
-        <Button size="icon" variant="secondary" className="cursor-pointer">
+        <Button
+          onClick={handleDownloadFile}
+          size="icon"
+          variant="secondary"
+          className="cursor-pointer"
+        >
           <Download className="size-4" />
         </Button>
       </AttachmentContent>
