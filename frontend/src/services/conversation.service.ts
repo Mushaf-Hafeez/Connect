@@ -34,3 +34,14 @@ export const sendMessage = async (
   )
   return response
 }
+
+// deleteMessage function
+export const deleteMessage = async (
+  conversationId: string,
+  messageId: string
+) => {
+  const response = await api.delete(
+    `conversations/${conversationId}/messages/${messageId}`
+  )
+  return response
+}

@@ -1,4 +1,4 @@
-import { Route, Routes, useNavigate } from "react-router-dom"
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom"
 
 // importing pages
 import Homepage from "./pages/Homepage"
@@ -19,7 +19,7 @@ import { useEffect } from "react"
 import { checkAuth } from "./services/auth.service"
 
 const App = () => {
-  const { setUser, clearUser } = useStore(userStore)
+  const { user, setUser, clearUser } = useStore(userStore)
 
   const navigate = useNavigate()
 
@@ -44,7 +44,10 @@ const App = () => {
   return (
     <main>
       <Routes>
-        <Route path="/" element={<Homepage />} />
+        <Route
+          path="/"
+          element={user ? <Navigate to={"/chat"} /> : <Homepage />}
+        />
         <Route path="/signup" element={<Signuppage />} />
         <Route path="/login" element={<Loginpage />} />
         <Route path="/verify-email" element={<VerifyEmailpage />} />

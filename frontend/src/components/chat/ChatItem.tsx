@@ -16,7 +16,7 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
 
   const openChat = () => {
     setIsChatSelected(true)
-    setChatSelected(participant)
+    setChatSelected(participant, convo.id)
     navigate(`/chat/${convo.id}`)
   }
 
