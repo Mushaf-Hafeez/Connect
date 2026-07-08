@@ -13,8 +13,14 @@ export const createConversation = async (userId: string) => {
 }
 
 // getMessages function
-export const getMessages = async (conversationId: string) => {
-  const response = await api.get(`/conversations/${conversationId}/messages`)
+export const getMessages = async (
+  conversationId: string,
+  page: number = 1,
+  take: number = 20
+) => {
+  const response = await api.get(
+    `/conversations/${conversationId}/messages?page=${page}&take=${take}`
+  )
   return response
 }
 
