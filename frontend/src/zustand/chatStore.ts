@@ -5,28 +5,37 @@ import { createStore } from "zustand"
 interface StoreState {
   isChatSelected: boolean
   chatSelected: Participant | null
-
+  conversationId: string | null
   messages: Message[]
 
   setIsChatSelected: (value: boolean) => void
-  setChatSelected: (chat: Participant | null) => void
+  setChatSelected: (
+    chat: Participant | null,
+    conversationId: string | null
+  ) => void
+  removeMessage: (messageId: string) => void
 }
 
 export const chatStore = createStore<StoreState>((set) => ({
   isChatSelected: false,
   chatSelected: null,
+  conversationId: null,
   messages: [],
 
   setIsChatSelected: (value: boolean) => {
     set({ isChatSelected: value })
   },
-  setChatSelected: (chat: Participant | null) => {
-    set({ chatSelected: chat })
+  setChatSelected: (
+    chat: Participant | null,
+    conversationId: string | null = null
+  ) => {
+    set({ chatSelected: chat, conversationId })
   },
 
   addMessages: (messages: Message[]) => {
     set((state) => ({
-      messages: [...state.messages, ...messages],
+      // messages: [...state.messages, ...messages],
+      messages,
     }))
   },
   addMessage: (message: Message) => {
