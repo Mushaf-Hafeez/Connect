@@ -14,6 +14,7 @@ interface StoreState {
     conversationId: string | null
   ) => void
   removeMessage: (messageId: string) => void
+  updateMessage: (messageId: string, text: string) => void
 }
 
 export const chatStore = createStore<StoreState>((set) => ({
@@ -33,10 +34,7 @@ export const chatStore = createStore<StoreState>((set) => ({
   },
 
   addMessages: (messages: Message[]) => {
-    set((state) => ({
-      // messages: [...state.messages, ...messages],
-      messages,
-    }))
+    set(() => ({ messages }))
   },
   addMessage: (message: Message) => {
     set((state) => ({
@@ -46,6 +44,13 @@ export const chatStore = createStore<StoreState>((set) => ({
   removeMessage: (messageId: string) => {
     set((state) => ({
       messages: state.messages.filter((message) => message.id !== messageId),
+    }))
+  },
+  updateMessage: (messageId: string, text: string) => {
+    set((state) => ({
+      messages: state.messages.map((message) =>
+        message.id === messageId ? { ...message, text } : message
+      ),
     }))
   },
 }))

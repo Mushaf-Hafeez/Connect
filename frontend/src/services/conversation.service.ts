@@ -35,6 +35,19 @@ export const sendMessage = async (
   return response
 }
 
+// editMessage function
+export const editMessage = async (
+  conversationId: string,
+  messageId: string,
+  text: string
+) => {
+  const response = await api.put(
+    `/conversations/${conversationId}/messages/${messageId}`,
+    { text }
+  )
+  return response
+}
+
 // deleteMessage function
 export const deleteMessage = async (
   conversationId: string,
