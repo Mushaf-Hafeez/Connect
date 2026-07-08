@@ -1,17 +1,9 @@
 import { useParams } from "react-router-dom"
 import ChatHeader from "./ChatHeader"
 import MessageInput from "./MessageInput"
-import type { Message } from "@/types/chat"
 import { useEffect, useState } from "react"
 import { getMessages } from "@/services/conversation.service"
-import Spinner from "../custom/Spinner"
-import {
-  Message as MessagePrimitive,
-  MessageAvatar,
-  MessageContent,
-} from "@/components/ui/message"
-import { Bubble, BubbleContent } from "@/components/ui/bubble"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   MessageScroller,
   MessageScrollerButton,
@@ -48,7 +40,7 @@ const ChatWindow = () => {
     }
 
     fetchMessages()
-  }, [id])
+  }, [addMessages, id])
 
   return (
     <div className="flex h-full flex-col">
@@ -56,7 +48,33 @@ const ChatWindow = () => {
 
       <div className="min-h-0 flex-1 scrollbar-none p-4">
         {isLoading ? (
-          <Spinner />
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, index) => {
+              const isRightAligned = index % 2 === 1
+
+              return (
+                <div
+                  key={index}
+                  className={`flex items-start gap-3 ${isRightAligned ? "justify-end" : "justify-start"}`}
+                >
+                  {!isRightAligned && (
+                    <Skeleton className="mt-1 size-8 shrink-0 rounded-full" />
+                  )}
+
+                  <div
+                    className={`flex max-w-[85%] flex-col gap-2 ${isRightAligned ? "items-end" : "items-start"}`}
+                  >
+                    <Skeleton
+                      className={`h-3 ${isRightAligned ? "w-20" : "w-24"}`}
+                    />
+                    <Skeleton
+                      className={`h-12 rounded-2xl ${isRightAligned ? "w-48" : "w-full"}`}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         ) : messages.length === 0 ? (
           <div className="text-sm text-muted-foreground">No messages yet</div>
         ) : (
