@@ -7,14 +7,17 @@ import { Label } from "@/components/ui/label"
 import Spinner from "../custom/Spinner"
 import { sendMessage } from "@/services/conversation.service"
 import { useParams } from "react-router-dom"
+import { useStore } from "zustand"
+import { chatStore } from "@/zustand/chatStore"
 
 const MessageInput = () => {
+  const { addMessage } = useStore(chatStore)
+
   const [message, setMessage] = useState("")
   const [attachments, setAttachments] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const params = useParams()
-
   const previews = useMemo(() => {
     return attachments.map((file) => ({
       file,
@@ -56,11 +59,11 @@ const MessageInput = () => {
         attachments,
       })
 
-      // make the api call to the backend
       const response = await sendMessage(params.id as string, formData)
 
       if (response.status === 201) {
         console.log("Message sent successfully:", response.data)
+        addMessage(response.data.message)
         setMessage("")
         setAttachments([])
       }

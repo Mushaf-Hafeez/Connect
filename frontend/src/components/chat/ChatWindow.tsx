@@ -20,17 +20,16 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller"
-import { userStore } from "@/zustand/userStore"
 import { useStore } from "zustand/react"
 import MessageBubble from "./MessageBubble"
+import { chatStore } from "@/zustand/chatStore"
 
 const ChatWindow = () => {
-  const [messages, setMessages] = useState<Message[]>([])
+  const { messages, addMessages } = useStore(chatStore)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const params = useParams()
   const id = params.id
-  const { user } = useStore(userStore)
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -39,7 +38,7 @@ const ChatWindow = () => {
         const response = await getMessages(id as string)
 
         if (response.status === 200) {
-          setMessages(response.data.messages)
+          addMessages(response.data.messages)
         }
       } catch (error) {
         console.error("Error in chat window component:", error)
