@@ -8,10 +8,8 @@ import { useStore } from "zustand"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "../ui/button"
@@ -26,8 +24,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
-import { EllipsisVertical, Trash2 } from "lucide-react"
+import { EllipsisVertical, Pencil, Trash2 } from "lucide-react"
 import { getFileType } from "@/utils/util"
 import AttachedVideo from "../attachment/AttachedVideo"
 import AttachedImage from "../attachment/AttachedImage"
@@ -35,22 +42,23 @@ import AttachedFile from "../attachment/AttachedFile"
 import { useState } from "react"
 import Spinner from "../custom/Spinner"
 import { chatStore } from "@/zustand/chatStore"
-import { deleteMessage } from "@/services/conversation.service"
-import { useParams } from "react-router-dom"
+import { deleteMessage, editMessage } from "@/services/conversation.service"
 import toast from "react-hot-toast"
-import type { ZodStringFormat } from "zod"
 
 const MessageBubble = ({ message }: { message: MessageType }) => {
   const { user } = useStore(userStore)
-  const { conversationId, removeMessage } = useStore(chatStore)
+  const { conversationId, removeMessage, updateMessage } = useStore(chatStore)
 
   const { displayName, profilePic } = message.sender
   const text = message.text
   const attachments = message.attachments
 
-  const isMe = message.sender.id === user.id
+  const isMe = message.sender.id === user?.id
 
   const [isDeleting, setIsDeleting] = useState<boolean>(false)
+  const [isEditing, setIsEditing] = useState<boolean>(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editedText, setEditedText] = useState(text || "")
 
   const handleMessageDelete = async () => {
     setIsDeleting(true)
@@ -68,11 +76,44 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
     }
   }
 
+  const handleMessageEdit = async () => {
+    const nextText = editedText.trim()
+
+    if (!conversationId) {
+      toast.error("Conversation not selected.")
+      return
+    }
+
+    if (!nextText || nextText === text) {
+      setIsEditDialogOpen(false)
+      return
+    }
+
+    setIsEditing(true)
+    try {
+      const response = await editMessage(conversationId, message.id, nextText)
+
+      if (response.status === 200) {
+        updateMessage(
+          message.id,
+          response.data?.updatedMessage?.text ?? nextText
+        )
+        toast.success("Message has been updated.")
+        setIsEditDialogOpen(false)
+      }
+    } catch (error) {
+      console.log("Error in the Message bubble component: ", error)
+      toast.error("Failed to update message.")
+    } finally {
+      setIsEditing(false)
+    }
+  }
+
   return (
     <Message className="flex items-center" align={isMe ? "end" : "start"}>
       <MessageAvatar className="self-start">
         <Avatar>
-          <AvatarImage src={profilePic} />
+          <AvatarImage src={profilePic ?? undefined} />
           <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
       </MessageAvatar>
@@ -93,6 +134,56 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuLabel className="p-1">
+                      <Dialog
+                        open={isEditDialogOpen}
+                        onOpenChange={setIsEditDialogOpen}
+                      >
+                        <DialogTrigger asChild>
+                          <DropdownMenuItem
+                            onSelect={(event) => event.preventDefault()}
+                            className="flex cursor-pointer items-center gap-2 rounded p-1 transition-all duration-200 hover:bg-muted"
+                          >
+                            <Pencil size={16} />
+                            <p className="font-medium">Edit</p>
+                          </DropdownMenuItem>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Edit message</DialogTitle>
+                            <DialogDescription>
+                              Update your message below and save the changes.
+                            </DialogDescription>
+                          </DialogHeader>
+
+                          <textarea
+                            value={editedText}
+                            onChange={(event) =>
+                              setEditedText(event.target.value)
+                            }
+                            className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            placeholder="Write a message"
+                          />
+
+                          <DialogFooter>
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsEditDialogOpen(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleMessageEdit}
+                              disabled={
+                                isEditing || editedText.trim().length === 0
+                              }
+                            >
+                              {isEditing && <Spinner />}
+                              Save changes
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+
                       <AlertDialog>
                         <AlertDialogTrigger className="flex w-full cursor-pointer items-center gap-2 rounded p-1 transition-all duration-200 hover:bg-red-400/20 hover:text-red-400">
                           <Trash2 size={16} />
