@@ -1,3 +1,5 @@
+import dayjs from "dayjs"
+
 export const getFileType = (extension: string): string => {
   const imageTypes = ["jpg", "jpeg", "png", "gif", "webp", "heic"]
 
@@ -14,4 +16,9 @@ export const getFileType = (extension: string): string => {
   }
 
   return type
+}
+
+export const getFormattedTime = (time: Date) => {
+  const formattedDate = dayjs(time).format("MM/DD/YY hh:mm A")
+  return formattedDate
 }

@@ -1,6 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
-import { Message, MessageAvatar, MessageContent } from "@/components/ui/message"
+import {
+  Message,
+  MessageAvatar,
+  MessageContent,
+  MessageFooter,
+} from "@/components/ui/message"
 import type { Message as MessageType } from "@/types/chat"
 import { userStore } from "@/zustand/userStore"
 import { useStore } from "zustand"
@@ -35,7 +40,7 @@ import {
 } from "@/components/ui/dialog"
 
 import { EllipsisVertical, Pencil, Trash2 } from "lucide-react"
-import { getFileType } from "@/utils/util"
+import { getFileType, getFormattedTime } from "@/utils/util"
 import AttachedVideo from "../attachment/AttachedVideo"
 import AttachedImage from "../attachment/AttachedImage"
 import AttachedFile from "../attachment/AttachedFile"
@@ -59,6 +64,8 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editedText, setEditedText] = useState(text || "")
+
+  const time = getFormattedTime(message.createAt)
 
   const handleMessageDelete = async () => {
     setIsDeleting(true)
@@ -258,6 +265,8 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
             </BubbleContent>
           )}
         </Bubble>
+        {/* Todo: Add message time here... */}
+        <MessageFooter>{time}</MessageFooter>
       </MessageContent>
     </Message>
   )
