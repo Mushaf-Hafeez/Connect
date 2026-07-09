@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { getPendingRequests } from "@/services/friend.service"
 import PendingRequestsList from "./PendingRequestsList"
 import type { PendingRequest } from "@/types/chat"
@@ -25,9 +26,14 @@ const PendingRequests = ({
     PendingRequest[] | null
   >(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    if (!isPendingDialogOpen) return
+    if (!isPendingDialogOpen) {
+      setSearchQuery("")
+      return
+    }
+
     const fetchPendingRequests = async () => {
       setIsLoading(true)
 
@@ -53,20 +59,29 @@ const PendingRequests = ({
         <DialogHeader>
           <DialogTitle>Pending requests</DialogTitle>
         </DialogHeader>
-        {/* pending requests list */}
-        <div className="mt-4 h-80 scrollbar-none overflow-y-auto">
-          {isLoading ? (
-            <ul>
-              {Array.from({ length: 5 }).map((_, index) => (
-                <UserSkeleton key={index} />
-              ))}
-            </ul>
-          ) : (
-            <PendingRequestsList
-              pendingRequests={pendingRequests}
-              setPendingRequests={setPendingRequests}
-            />
-          )}
+        <div className="mt-4 space-y-3">
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search requests"
+            className="h-9"
+          />
+
+          <div className="h-80 scrollbar-none overflow-y-auto">
+            {isLoading ? (
+              <ul>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <UserSkeleton key={index} />
+                ))}
+              </ul>
+            ) : (
+              <PendingRequestsList
+                pendingRequests={pendingRequests}
+                setPendingRequests={setPendingRequests}
+                searchQuery={searchQuery}
+              />
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

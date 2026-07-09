@@ -24,7 +24,7 @@ import { conversationStore } from "@/zustand/conversationStore"
 
 export type Participant = {
   user: User
-   lastReadAt: Date | null
+  lastReadAt: Date | null
 }
 
 interface Message {
@@ -42,7 +42,11 @@ export interface Conversation {
   messages: Message
 }
 
-const ChatList = () => {
+interface ChatListProps {
+  searchQuery: string
+}
+
+const ChatList = ({ searchQuery }: ChatListProps) => {
   const [search, setSearch] = useState<string>("")
   const [friends, setFriends] = useState<Friend[] | null>(null)
   const { conversations, setConversations } = useStore(conversationStore)
@@ -91,6 +95,23 @@ const ChatList = () => {
     fetchFriends()
   }, [conversationDialogOpen])
 
+  const filteredConversations =
+    conversations?.filter((convo) => {
+      const query = searchQuery.trim().toLowerCase()
+      if (!query) return true
+
+      const participant = convo.participants[0]
+      const displayName = participant?.user?.displayName?.toLowerCase() ?? ""
+      const username = participant?.user?.username?.toLowerCase() ?? ""
+      const lastMessage = convo.messages?.at(-1)?.text?.toLowerCase() ?? ""
+
+      return (
+        displayName.includes(query) ||
+        username.includes(query) ||
+        lastMessage.includes(query)
+      )
+    }) ?? []
+
   return (
     <div className="relative h-full flex-1 px-4">
       {!isFetching && (
@@ -136,8 +157,12 @@ const ChatList = () => {
       )}
       {isFetching ? (
         <ChatListSkeleton />
-      ) : conversations && conversations.length > 0 ? (
-        conversations.map((convo) => <ChatItem key={convo.id} convo={convo} />)
+      ) : filteredConversations.length > 0 ? (
+        filteredConversations.map((convo) => (
+          <ChatItem key={convo.id} convo={convo} />
+        ))
+      ) : searchQuery.trim() ? (
+        "No conversations match your search"
       ) : (
         "No Start conversation"
       )}

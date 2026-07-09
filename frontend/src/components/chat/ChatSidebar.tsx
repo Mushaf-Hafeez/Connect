@@ -61,6 +61,7 @@ const ChatSidebar = () => {
   const [isPendingDialogOpen, setIsPendingDialogOpen] = useState(false)
   const [isManageFriendsDialogOpen, setIsManageFriendsDialogOpen] =
     useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   return (
     <>
@@ -100,7 +101,12 @@ const ChatSidebar = () => {
 
           <div className="relative">
             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search conversations..." className="pl-9" />
+            <Input
+              placeholder="Search conversations..."
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
 
@@ -125,7 +131,7 @@ const ChatSidebar = () => {
             value="chats"
             className="mt-0 min-h-0 flex-1 scrollbar-none overflow-y-auto"
           >
-            <ChatList />
+            <ChatList searchQuery={searchQuery} />
           </TabsContent>
 
           <TabsContent
