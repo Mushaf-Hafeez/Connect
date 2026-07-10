@@ -5,6 +5,7 @@ import http from "http";
 import { Server } from "socket.io";
 
 import { config } from "dotenv";
+import prisma from "./config/db.config.js";
 config();
 
 export const app: Application = express();
@@ -40,7 +41,16 @@ io.on("connection", (socket) => {
   // online user event
   io.emit("add-online-user", Object.keys(connectedUsers));
 
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        lastSeen: new Date(),
+      },
+    });
+
     delete connectedUsers[userId];
     console.log(`user disconnected: ${userId}`);
     io.emit("remove-online-user", userId);

@@ -13,6 +13,8 @@ interface StoreState {
     chat: Participant | null,
     conversationId: string | null
   ) => void
+  clearChatSelected: () => void
+
   addMessages: (messages: Message[]) => void
   addMessage: (message: Message) => void
   removeMessage: (messageId: string) => void
@@ -33,6 +35,9 @@ export const chatStore = createStore<StoreState>((set) => ({
     conversationId: string | null = null
   ) => {
     set({ chatSelected: chat, conversationId })
+  },
+  clearChatSelected: () => {
+    set({ isChatSelected: false, chatSelected: null })
   },
 
   addMessages: (messages: Message[]) => {

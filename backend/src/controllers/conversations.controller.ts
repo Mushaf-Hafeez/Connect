@@ -149,6 +149,7 @@ export const getConversations = async (
                 displayName: true,
                 username: true,
                 profilePic: true,
+                lastSeen: true,
               },
             },
             lastReadAt: true,
