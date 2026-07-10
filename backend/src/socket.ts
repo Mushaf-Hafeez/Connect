@@ -10,6 +10,8 @@ config();
 export const app: Application = express();
 export const server = http.createServer(app);
 
+export const connectedUsers: any = {};
+
 // creating socket server
 const io = new Server(server, {
   cors: {
@@ -23,7 +25,21 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log(`user connected: ${socket.id}`);
 
+  const { userId } = socket.handshake.auth;
+  const { id: socketId } = socket;
+
+  if (!userId) {
+    socket.disconnect();
+    return;
+  }
+
+  // join room
+  socket.join(userId);
+  // store the userId with socketId
+  connectedUsers[userId] = socketId;
+
   socket.on("disconnect", () => {
-    console.log("user disconnected.");
+    delete connectedUsers[userId];
+    console.log(`user disconnected: ${userId}`);
   });
 });
