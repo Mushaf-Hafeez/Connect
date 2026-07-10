@@ -3,4 +3,5 @@ export interface User {
   displayName: string
   username: string
   profilePic: string | null
+  lastSeen?: Date
 }
