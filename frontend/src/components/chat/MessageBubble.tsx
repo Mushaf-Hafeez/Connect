@@ -65,7 +65,7 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editedText, setEditedText] = useState(text || "")
 
-  const time = getFormattedTime(message.createAt)
+  const time = getFormattedTime(message.createdAt)
 
   const handleMessageDelete = async () => {
     setIsDeleting(true)

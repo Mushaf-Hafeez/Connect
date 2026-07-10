@@ -7,13 +7,23 @@ import { socketStore } from "@/zustand/socketStore"
 import { Button } from "../ui/button"
 import { useNavigate } from "react-router-dom"
 
+import dayjs from "dayjs"
+import relativeTime from "dayjs/plugin/relativeTime"
+import calender from "dayjs/plugin/calendar"
+
+dayjs.extend(relativeTime)
+dayjs.extend(calender)
+
 const ChatHeader = () => {
   const { chatSelected, clearChatSelected } = useStore(chatStore)
   const { onlineUsers } = useStore(socketStore)
 
   const navigate = useNavigate()
 
-  const { displayName, profilePic, id } = chatSelected.user
+  const { displayName, profilePic, id, lastSeen } = chatSelected.user
+
+  const lastSeenDate = dayjs(lastSeen)
+  const lastSeenTime = lastSeenDate.fromNow()
 
   const isOnline = onlineUsers.includes(id)
 
@@ -50,7 +60,7 @@ const ChatHeader = () => {
                 isOnline ? "text-green-500" : "text-muted-foreground"
               }`}
             >
-              {isOnline ? "Online" : "Offline"}
+              {isOnline ? "Online" : lastSeenTime}
             </p>
           </div>
         </div>
