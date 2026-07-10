@@ -14,15 +14,18 @@ interface User {
 
 interface UserState {
   user: User | null
+  isCheckingAuth: boolean
 
   setUser: (user: User) => void
   clearUser: () => void
+  setIsCheckingAuth: (isCheckingAuth: boolean) => void
 }
 
 const storedUser = localStorage.getItem("user")
 
 export const userStore = create<UserState>((set) => ({
   user: storedUser ? JSON.parse(storedUser) : null,
+  isCheckingAuth: true,
 
   setUser: (user) => {
     localStorage.setItem("user", JSON.stringify(user))
@@ -32,5 +35,9 @@ export const userStore = create<UserState>((set) => ({
   clearUser: () => {
     localStorage.removeItem("user")
     set({ user: null })
+  },
+
+  setIsCheckingAuth: (isCheckingAuth: boolean) => {
+    set({ isCheckingAuth })
   },
 }))

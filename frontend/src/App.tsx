@@ -17,9 +17,12 @@ import { useStore } from "zustand"
 import { userStore } from "./zustand/userStore"
 import { useEffect } from "react"
 import { checkAuth } from "./services/auth.service"
+import { socketStore } from "./zustand/socketStore"
 
 const App = () => {
-  const { user, setUser, clearUser } = useStore(userStore)
+  const { user, isCheckingAuth, setIsCheckingAuth, setUser, clearUser } =
+    useStore(userStore)
+  const { connectSocket, disconnectSocket } = useStore(socketStore)
 
   const navigate = useNavigate()
 
@@ -35,11 +38,23 @@ const App = () => {
         console.log("Error in the app component: ", error)
         clearUser()
         navigate("/")
+      } finally {
+        setIsCheckingAuth(false)
       }
     }
 
     checkAuthentication()
   }, [setUser, clearUser])
+
+  useEffect(() => {
+    if (isCheckingAuth) return
+
+    if (user) {
+      connectSocket(user.id)
+    } else {
+      disconnectSocket()
+    }
+  }, [user, isCheckingAuth])
 
   return (
     <main>
