@@ -22,7 +22,13 @@ import { socketStore } from "./zustand/socketStore"
 const App = () => {
   const { user, isCheckingAuth, setIsCheckingAuth, setUser, clearUser } =
     useStore(userStore)
-  const { connectSocket, disconnectSocket } = useStore(socketStore)
+  const {
+    socket,
+    connectSocket,
+    disconnectSocket,
+    setOnlineUsers,
+    removeOnlineUser,
+  } = useStore(socketStore)
 
   const navigate = useNavigate()
 
@@ -55,6 +61,18 @@ const App = () => {
       disconnectSocket()
     }
   }, [user, isCheckingAuth])
+
+  useEffect(() => {
+    if (!socket) return
+
+    socket.on("add-online-user", (userIds) => setOnlineUsers(userIds))
+    socket.on("remove-online-user", (userId) => removeOnlineUser(userId))
+
+    return () => {
+      socket.off("add-online-user")
+      // socket.off("remove-online-user")
+    }
+  }, [socket])
 
   return (
     <main>

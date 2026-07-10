@@ -31,7 +31,8 @@ const ConversationItem = ({
         const conversation = {
           ...response.data.conversation,
           participants: response.data.conversation.participants.filter(
-            (participant: { user: { id: string } }) => participant.user.id === id,
+            (participant: { user: { id: string } }) =>
+              participant.user.id === id
           ),
           messages: response.data.conversation.messages ?? [],
         }
@@ -51,6 +52,7 @@ const ConversationItem = ({
         <Avatar>
           <AvatarImage src={profilePic} />
           <AvatarFallback>{username.slice(0, 2).toUpperCase()}</AvatarFallback>
+          <p className="text-red-400">this is a paragraph</p>
         </Avatar>
         <div>
           <h3 className="text-sm font-semibold">{displayName}</h3>

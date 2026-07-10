@@ -3,13 +3,18 @@ import { io, Socket } from "socket.io-client"
 
 interface SocketState {
   socket: Socket | null
+  onlineUsers: string[]
 
   connectSocket: (userId: string) => void
   disconnectSocket: () => void
+
+  setOnlineUsers: (onlineUserIds: string[]) => void
+  removeOnlineUser: (onlineUserId: string) => void
 }
 
 export const socketStore = create<SocketState>((set, get) => ({
   socket: null,
+  onlineUsers: [],
 
   connectSocket: (userId: string) => {
     console.log(import.meta.env.VITE_BACKEND_URL)
@@ -34,5 +39,19 @@ export const socketStore = create<SocketState>((set, get) => ({
       socket.disconnect()
       set({ socket: null })
     }
+  },
+
+  setOnlineUsers: (onlineUserIds: string[]) => {
+    set({
+      onlineUsers: onlineUserIds,
+    })
+  },
+
+  removeOnlineUser: (onlineUserId: string) => {
+    set((state) => ({
+      onlineUsers: state.onlineUsers.filter(
+        (onlineUser) => onlineUser !== onlineUserId
+      ),
+    }))
   },
 }))

@@ -4,9 +4,13 @@ import type { Conversation } from "./ChatList"
 import { useNavigate } from "react-router-dom"
 import { useStore } from "zustand"
 import { chatStore } from "@/zustand/chatStore"
+import { socketStore } from "@/zustand/socketStore"
 
 const ChatItem = ({ convo }: { convo: Conversation }) => {
   const { setIsChatSelected, setChatSelected } = useStore(chatStore)
+  const { onlineUsers } = useStore(socketStore)
+
+  console.log("online users: ", onlineUsers)
 
   const participant = convo.participants[0]
   const user = participant.user
@@ -25,7 +29,10 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
       onClick={openChat}
       className="flex cursor-pointer items-center gap-3 rounded-lg border-b p-4 transition-colors hover:bg-muted"
     >
-      <Avatar>
+      <Avatar className="relative">
+        {onlineUsers.includes(user.id) && (
+          <span className="absolute top-0 left-0 size-2 rounded-full bg-primary"></span>
+        )}
         <AvatarImage src={user.profilePic ?? undefined} />
         <AvatarFallback>
           {user.displayName.charAt(0).toUpperCase()}
