@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import ManageFriendsList from "./ManageFriendsList"
 import { getFriends } from "@/services/friend.service"
 import type { Friend } from "@/types/chat"
@@ -22,9 +23,14 @@ const ManageFriends = ({
 }: ManageFriendsProps) => {
   const [friends, setFriends] = useState<Friend[] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    if (!isManageFriendsDialogOpen) return
+    if (!isManageFriendsDialogOpen) {
+      setSearchQuery("")
+      return
+    }
+
     const fetchFriends = async () => {
       setIsLoading(true)
       try {
@@ -53,17 +59,29 @@ const ManageFriends = ({
         <DialogHeader>
           <DialogTitle>Friends</DialogTitle>
         </DialogHeader>
-        {/* Frinds list */}
-        <div className="mt-4 h-80 scrollbar-none overflow-y-auto">
-          {isLoading ? (
-            <ul className="space-y-2">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <UserSkeleton key={index} />
-              ))}
-            </ul>
-          ) : (
-            <ManageFriendsList friends={friends} setFriends={setFriends} />
-          )}
+        <div className="mt-4 space-y-3">
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search friends"
+            className="h-9"
+          />
+
+          <div className="h-80 scrollbar-none overflow-y-auto">
+            {isLoading ? (
+              <ul className="space-y-2">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <UserSkeleton key={index} />
+                ))}
+              </ul>
+            ) : (
+              <ManageFriendsList
+                friends={friends}
+                setFriends={setFriends}
+                searchQuery={searchQuery}
+              />
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -227,6 +227,7 @@ export const getMessages = async (
         id: true,
         text: true,
         attachments: true,
+        createdAt: true,
         sender: {
           select: {
             id: true,

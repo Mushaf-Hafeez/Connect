@@ -21,6 +21,7 @@ export interface Message {
   attachments: string[]
   sender: User
   statuses: MessageStatusInfo[]
+  createdAt: Date
 }
 
 export type Requester = Omit<User, "id">
