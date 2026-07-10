@@ -37,9 +37,12 @@ io.on("connection", (socket) => {
   socket.join(userId);
   // store the userId with socketId
   connectedUsers[userId] = socketId;
+  // online user event
+  io.emit("add-online-user", Object.keys(connectedUsers));
 
   socket.on("disconnect", () => {
     delete connectedUsers[userId];
     console.log(`user disconnected: ${userId}`);
+    io.emit("remove-online-user", userId);
   });
 });
