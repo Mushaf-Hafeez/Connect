@@ -1,11 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
-import {
-  Message,
-  MessageAvatar,
-  MessageContent,
-  MessageFooter,
-} from "@/components/ui/message"
+import { Message, MessageContent, MessageFooter } from "@/components/ui/message"
 import type { Message as MessageType } from "@/types/chat"
 import { userStore } from "@/zustand/userStore"
 import { useStore } from "zustand"
@@ -118,12 +113,12 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
 
   return (
     <Message className="flex items-center" align={isMe ? "end" : "start"}>
-      <MessageAvatar className="self-start">
-        <Avatar>
-          <AvatarImage src={profilePic ?? undefined} />
-          <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
-        </Avatar>
-      </MessageAvatar>
+      {/* <MessageAvatar className="self-start"> */}
+      <Avatar className="self-start">
+        <AvatarImage src={profilePic} />
+        <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
+      </Avatar>
+      {/* </MessageAvatar> */}
       <MessageContent>
         <Bubble variant={"outline"}>
           {text && (
