@@ -1,5 +1,6 @@
 import express from "express";
-import type { Application, Request, Response, NextFunction } from "express";
+import { app, server } from "./socket.js";
+import type { Request, Response, NextFunction } from "express";
 
 // importing types
 import type { CustomError } from "./types/index.js";
@@ -22,9 +23,6 @@ import { config } from "dotenv";
 config();
 
 const PORT = process.env.PORT || 3000;
-
-// app instance
-const app: Application = express();
 
 // middlewares
 app.use(express.json());
@@ -69,6 +67,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // listen to the requests
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   logger.info(`http://localhost:${PORT}`);
 });
