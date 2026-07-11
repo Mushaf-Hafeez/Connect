@@ -2,6 +2,11 @@ import type { Participant } from "@/components/chat/ChatList"
 import type { Message } from "@/types/chat"
 import { createStore } from "zustand"
 
+const sortMessages = (messages: Message[]) =>
+  [...messages].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  )
+
 interface StoreState {
   isChatSelected: boolean
   chatSelected: Participant | null
@@ -13,9 +18,12 @@ interface StoreState {
     chat: Participant | null,
     conversationId: string | null
   ) => void
+  setConversationId: (conversationId: string | null) => void
   clearChatSelected: () => void
 
+  clearMessages: () => void
   addMessages: (messages: Message[]) => void
+  prependMessages: (messages: Message[]) => void
   addMessage: (message: Message) => void
   removeMessage: (messageId: string) => void
   updateMessage: (messageId: string, text: string) => void
@@ -36,17 +44,37 @@ export const chatStore = createStore<StoreState>((set) => ({
   ) => {
     set({ chatSelected: chat, conversationId })
   },
+  setConversationId: (conversationId: string | null) => {
+    set({ conversationId })
+  },
   clearChatSelected: () => {
-    set({ isChatSelected: false, chatSelected: null })
+    set({ isChatSelected: false, chatSelected: null, conversationId: null })
   },
 
+  clearMessages: () => {
+    set({ messages: [] })
+  },
   addMessages: (messages: Message[]) => {
-    set({ messages })
+    set({ messages: sortMessages(messages) })
+  },
+  prependMessages: (messages: Message[]) => {
+    set((state) => {
+      const existingIds = new Set(state.messages.map((message) => message.id))
+      const newMessages = messages.filter(
+        (message) => !existingIds.has(message.id)
+      )
+
+      return { messages: sortMessages([...newMessages, ...state.messages]) }
+    })
   },
   addMessage: (message: Message) => {
-    set((state) => ({
-      messages: [...state.messages, message],
-    }))
+    set((state) => {
+      if (state.messages.some((existing) => existing.id === message.id)) {
+        return state
+      }
+
+      return { messages: sortMessages([...state.messages, message]) }
+    })
   },
   removeMessage: (messageId: string) => {
     set((state) => ({

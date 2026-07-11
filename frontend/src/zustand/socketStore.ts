@@ -17,7 +17,12 @@ export const socketStore = create<SocketState>((set, get) => ({
   onlineUsers: [],
 
   connectSocket: (userId: string) => {
-    console.log(import.meta.env.VITE_BACKEND_URL)
+    const { socket: existingSocket } = get()
+
+    if (existingSocket) {
+      existingSocket.disconnect()
+    }
+
     const socket = io(import.meta.env.VITE_BACKEND_URL, {
       auth: {
         userId,
@@ -26,7 +31,7 @@ export const socketStore = create<SocketState>((set, get) => ({
     })
 
     socket.on("connect", () => {
-      console.log("socket connected: ", socket.id)
+      // console.log("socket connected: ", socket.id)
     })
 
     set({ socket })

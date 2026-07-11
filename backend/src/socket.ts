@@ -14,7 +14,7 @@ export const server = http.createServer(app);
 export const connectedUsers: any = {};
 
 // creating socket server
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL,
     credentials: true,

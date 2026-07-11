@@ -11,6 +11,7 @@ import {
 } from "../validations/conversation.validation.js";
 import { success } from "zod";
 import { formatZodErrors } from "../utils/helper.js";
+import { io } from "../socket.js";
 
 // ======================================================
 //             conversation controller
@@ -247,7 +248,7 @@ export const getMessages = async (
       skip,
       take,
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
     });
 
@@ -261,7 +262,7 @@ export const getMessages = async (
 
     return res.status(200).json({
       success: true,
-      messages,
+      messages: messages.reverse(),
       hasMore,
     });
   } catch (error) {
@@ -329,6 +330,8 @@ export const sendMessage = async (
         id: true,
         text: true,
         attachments: true,
+        createdAt: true,
+        conversationId: true,
         sender: {
           select: {
             id: true,
@@ -345,6 +348,28 @@ export const sendMessage = async (
         },
       },
     });
+
+    // send message to the user using sockets
+    const receiver = await prisma.conversationParticipant.findFirst({
+      where: {
+        conversationId,
+        userId: {
+          not: req.user.id,
+        },
+      },
+      select: {
+        user: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (receiver) {
+      console.log(receiver.user.id);
+      io.to(receiver.user.id).emit("new-message", message);
+    }
 
     return res.status(201).json({
       success: true,
