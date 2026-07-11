@@ -15,11 +15,18 @@ import {
 } from "@/components/ui/message-scroller"
 import { useStore } from "zustand/react"
 import MessageBubble from "./MessageBubble"
+import TypingIndicator from "./TypingIndicator"
 import { chatStore } from "@/zustand/chatStore"
 
 const ChatWindow = () => {
-  const { messages, addMessages, prependMessages, clearMessages } =
-    useStore(chatStore)
+  const {
+    messages,
+    addMessages,
+    prependMessages,
+    clearMessages,
+    setIsTyping,
+    isTyping,
+  } = useStore(chatStore)
   const setConversationId = useStore(
     chatStore,
     (state) => state.setConversationId
@@ -35,21 +42,12 @@ const ChatWindow = () => {
   const params = useParams()
   const id = params.id
 
-
-  useEffect(() => {
-    if (scrollerRef.current) {
-      scrollerRef.current.scrollTo({
-        top: scrollerRef.current.scrollHeight,
-        behavior: "smooth",
-      })
-    }
-  }, [messages])
-
   useEffect(() => {
     if (id) {
       setConversationId(id)
+      setIsTyping(false)
     }
-  }, [id, setConversationId])
+  }, [id, setConversationId, setIsTyping])
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -105,15 +103,13 @@ const ChatWindow = () => {
   }
 
   useEffect(() => {
-
     if (scrollerRef.current) {
       scrollerRef.current.scrollTo({
         top: scrollerRef.current.scrollHeight,
         behavior: "smooth",
       })
     }
-
-  }, [messages])
+  }, [messages, isTyping])
 
   return (
     <div className="flex h-full flex-col">
@@ -190,6 +186,12 @@ const ChatWindow = () => {
           </MessageScrollerProvider>
         )}
       </div>
+
+      {!isLoading && (
+        <div className="px-4 pb-1">
+          <TypingIndicator />
+        </div>
+      )}
 
       <MessageInput />
     </div>

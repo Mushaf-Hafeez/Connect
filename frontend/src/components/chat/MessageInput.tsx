@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { FileText, Plus, SendHorizontal, Video, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -9,15 +9,23 @@ import { sendMessage } from "@/services/conversation.service"
 import { useParams } from "react-router-dom"
 import { useStore } from "zustand"
 import { chatStore } from "@/zustand/chatStore"
+import { socketStore } from "@/zustand/socketStore"
+
+const TYPING_STOP_DELAY_MS = 2000
 
 const MessageInput = () => {
-  const { addMessage } = useStore(chatStore)
+  const { addMessage, conversationId, chatSelected } = useStore(chatStore)
+  const { socket } = useStore(socketStore)
 
   const [message, setMessage] = useState("")
   const [attachments, setAttachments] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isTypingRef = useRef(false)
+
   const params = useParams()
+
   const previews = useMemo(() => {
     return attachments.map((file) => ({
       file,
@@ -38,10 +46,62 @@ const MessageInput = () => {
     setAttachments((prev) => prev.filter((_, i) => i !== index))
   }
 
+  const emitTypingStop = () => {
+    if (!socket || !conversationId || !chatSelected) return
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+      typingTimeoutRef.current = null
+    }
+
+    if (!isTypingRef.current) return
+
+    socket.emit("typing-stop", {
+      conversationId,
+      recipientId: chatSelected.user.id,
+    })
+    isTypingRef.current = false
+  }
+
+  const handleMessageChange = (value: string) => {
+    setMessage(value)
+
+    if (!socket || !conversationId || !chatSelected) return
+
+    if (!value.trim()) {
+      emitTypingStop()
+      return
+    }
+
+    if (!isTypingRef.current) {
+      socket.emit("typing-start", {
+        conversationId,
+        recipientId: chatSelected.user.id,
+      })
+      isTypingRef.current = true
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      emitTypingStop()
+    }, TYPING_STOP_DELAY_MS)
+  }
+
+  useEffect(() => {
+    return () => {
+      emitTypingStop()
+    }
+  }, [conversationId, chatSelected?.user.id, socket])
+
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (!message.trim() && attachments.length === 0) return
+
+    emitTypingStop()
 
     try {
       setIsSubmitting(true)
@@ -142,7 +202,7 @@ const MessageInput = () => {
 
         <Input
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => handleMessageChange(e.target.value)}
           placeholder="Type a message..."
         />
 
