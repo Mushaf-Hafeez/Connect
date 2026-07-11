@@ -22,6 +22,7 @@ export interface Message {
   sender: User
   statuses: MessageStatusInfo[]
   createdAt: Date
+  conversationId?: string
 }
 
 export type Requester = Omit<User, "id">

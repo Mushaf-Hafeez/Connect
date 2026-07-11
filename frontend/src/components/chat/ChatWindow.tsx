@@ -18,19 +18,46 @@ import MessageBubble from "./MessageBubble"
 import { chatStore } from "@/zustand/chatStore"
 
 const ChatWindow = () => {
-  const { messages, addMessages } = useStore(chatStore)
+  const { messages, addMessages, prependMessages, clearMessages } =
+    useStore(chatStore)
+  const setConversationId = useStore(
+    chatStore,
+    (state) => state.setConversationId
+  )
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [isFetchingOlder, setIsFetchingOlder] = useState(false)
   const viewportRef = useRef<HTMLDivElement | null>(null)
 
+  const scrollerRef = useRef<HTMLDivElement | null>(null)
+
   const params = useParams()
   const id = params.id
+
+
+  useEffect(() => {
+    if (scrollerRef.current) {
+      scrollerRef.current.scrollTo({
+        top: scrollerRef.current.scrollHeight,
+        behavior: "smooth",
+      })
+    }
+  }, [messages])
+
+  useEffect(() => {
+    if (id) {
+      setConversationId(id)
+    }
+  }, [id, setConversationId])
 
   useEffect(() => {
     const fetchMessages = async () => {
       setIsLoading(true)
+      clearMessages()
+      setPage(1)
+      setHasMore(true)
+
       try {
         const response = await getMessages(id as string, 1, 20)
 
@@ -49,7 +76,7 @@ const ChatWindow = () => {
     if (id) {
       fetchMessages()
     }
-  }, [addMessages, id])
+  }, [addMessages, clearMessages, id])
 
   const fetchOlderMessages = async () => {
     if (!id || isFetchingOlder || !hasMore) return
@@ -63,7 +90,7 @@ const ChatWindow = () => {
         const olderMessages = response.data.messages
 
         if (olderMessages.length > 0) {
-          addMessages([...olderMessages, ...messages])
+          prependMessages(olderMessages)
           setPage((prev) => prev + 1)
           setHasMore(response.data.hasMore)
         } else {
@@ -76,6 +103,17 @@ const ChatWindow = () => {
       setIsFetchingOlder(false)
     }
   }
+
+  useEffect(() => {
+
+    if (scrollerRef.current) {
+      scrollerRef.current.scrollTo({
+        top: scrollerRef.current.scrollHeight,
+        behavior: "smooth",
+      })
+    }
+
+  }, [messages])
 
   return (
     <div className="flex h-full flex-col">
@@ -135,7 +173,7 @@ const ChatWindow = () => {
                   scrollableTarget="chat-scroll-view"
                   scrollThreshold={0.8}
                 >
-                  <MessageScrollerContent>
+                  <MessageScrollerContent ref={scrollerRef}>
                     {messages.map((message) => (
                       <MessageScrollerItem
                         key={message.id}

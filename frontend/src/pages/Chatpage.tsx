@@ -2,10 +2,29 @@ import ChatSidebar from "@/components/chat/ChatSidebar"
 import { Outlet } from "react-router-dom"
 import { useStore } from "zustand"
 import { chatStore } from "@/zustand/chatStore"
+import { useEffect } from "react"
+import { socketStore } from "@/zustand/socketStore"
+import type { Message } from "@/types/chat"
 
 const ChatPage = () => {
-  const { isChatSelected } = useStore(chatStore)
+  const { addMessage, isChatSelected, conversationId } = useStore(chatStore)
+  const { socket } = useStore(socketStore)
 
+  useEffect(() => {
+    if (!socket) return
+
+    const handleNewMessage = (message: Message) => {
+      if (message.conversationId !== conversationId) return
+
+      addMessage(message)
+    }
+
+    socket.on("new-message", handleNewMessage)
+
+    return () => {
+      socket.off("new-message", handleNewMessage)
+    }
+  }, [socket, addMessage, conversationId])
   return (
     <div className="h-screen bg-background">
       <div className="flex h-full">

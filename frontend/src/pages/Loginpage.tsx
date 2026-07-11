@@ -142,6 +142,7 @@ const Loginpage = () => {
                   onClick={handleShowPassword}
                   variant={"ghost"}
                   size={"icon-lg"}
+                  type="button"
                   className="absolute right-0 flex-center cursor-pointer"
                 >
                   {showPassword ? <EyeClosed size={18} /> : <Eye size={18} />}

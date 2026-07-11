@@ -70,7 +70,7 @@ const App = () => {
 
     return () => {
       socket.off("add-online-user")
-      // socket.off("remove-online-user")
+      socket.off("remove-online-user")
     }
   }, [socket])
 

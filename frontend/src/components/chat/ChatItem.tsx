@@ -10,8 +10,6 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
   const { setIsChatSelected, setChatSelected } = useStore(chatStore)
   const { onlineUsers } = useStore(socketStore)
 
-  console.log("online users: ", onlineUsers)
-
   const participant = convo.participants[0]
   const user = participant.user
   const lastMessage = convo.messages.at(-1)
