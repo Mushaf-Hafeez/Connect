@@ -206,7 +206,12 @@ const MessageInput = () => {
           placeholder="Type a message..."
         />
 
-        <Button type="submit" size="icon" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          size="icon"
+          disabled={isSubmitting}
+          className={`${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"}`}
+        >
           {isSubmitting ? <Spinner /> : <SendHorizontal size={18} />}
         </Button>
       </form>

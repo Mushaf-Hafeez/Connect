@@ -40,12 +40,12 @@ const tabs: Tab[] = [
     value: "chats",
     icon: MessageCircle,
   },
-  {
-    id: 2,
-    label: "Groups",
-    value: "groups",
-    icon: Users,
-  },
+  // {
+  //   id: 2,
+  //   label: "Groups",
+  //   value: "groups",
+  //   icon: Users,
+  // },
   {
     id: 3,
     label: "Calls",
@@ -73,23 +73,30 @@ const ChatSidebar = () => {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="cursor-pointer">
                   <EllipsisVertical className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsAddDialogOpen(true)}>
+                <DropdownMenuItem
+                  className="cursor-pointer transition-all duration-100 hover:bg-muted"
+                  onClick={() => setIsAddDialogOpen(true)}
+                >
                   <UserPlus className="mr-2 h-4 w-4" />
                   Add friend
                 </DropdownMenuItem>
 
-                <DropdownMenuItem onClick={() => setIsPendingDialogOpen(true)}>
+                <DropdownMenuItem
+                  className="cursor-pointer transition-all duration-100 hover:bg-muted"
+                  onClick={() => setIsPendingDialogOpen(true)}
+                >
                   <UserCheck className="mr-2 h-4 w-4" />
                   Pending requests
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
+                  className="cursor-pointer transition-all duration-100 hover:bg-muted"
                   onClick={() => setIsManageFriendsDialogOpen(true)}
                 >
                   <Users className="mr-2 h-4 w-4" />
@@ -118,9 +125,9 @@ const ChatSidebar = () => {
           <div className="border-b p-4">
             <TabsList
               variant="line"
-              className="grid w-full grid-cols-3 bg-transparent"
+              className="grid w-full grid-cols-2 justify-evenly bg-transparent"
             >
-              {tabs.map((tab, index) => (
+              {tabs.map((tab) => (
                 <TabsTrigger
                   onClick={() => setDefaultTab(tab.value)}
                   key={tab.id}
