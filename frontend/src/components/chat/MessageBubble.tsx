@@ -113,12 +113,10 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
 
   return (
     <Message className="flex items-center" align={isMe ? "end" : "start"}>
-      {/* <MessageAvatar className="self-start"> */}
       <Avatar className="self-start">
         <AvatarImage src={profilePic} />
         <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
       </Avatar>
-      {/* </MessageAvatar> */}
       <MessageContent>
         <Bubble variant={"outline"}>
           {text && (
@@ -260,7 +258,6 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
             </BubbleContent>
           )}
         </Bubble>
-        {/* Todo: Add message time here... */}
         <MessageFooter>{time}</MessageFooter>
       </MessageContent>
     </Message>

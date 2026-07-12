@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import type { Dispatch, SetStateAction } from "react"
 
 import type { User } from "@/types/user"

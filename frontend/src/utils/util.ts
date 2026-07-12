@@ -5,7 +5,7 @@ export const getFileType = (extension: string): string => {
 
   const videoTypes = ["mp4", "mov", "avi", "mkv", "webm"]
 
-  let type: string = ""
+  let type: string
 
   if (imageTypes.includes(extension.toLowerCase())) {
     type = "image"

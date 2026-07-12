@@ -1,5 +1,3 @@
-import React from "react"
-
 const DefaultChatpage = () => {
   return (
     <div className="flex-center h-screen w-full">
