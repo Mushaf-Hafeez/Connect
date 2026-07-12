@@ -25,8 +25,6 @@ import ChatList from "./ChatList"
 import PendingRequests from "../friends/PendingRequests"
 import AddFriend from "../friends/AddFriend"
 import ManageFriends from "../friends/ManageFriends"
-import { useStore } from "zustand"
-import { chatStore } from "@/zustand/chatStore"
 
 interface Tab {
   id: number
@@ -62,6 +60,8 @@ const ChatSidebar = () => {
   const [isManageFriendsDialogOpen, setIsManageFriendsDialogOpen] =
     useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+
+  const [defaultTab, setDefaultTab] = useState("chats")
 
   return (
     <>
@@ -111,14 +111,21 @@ const ChatSidebar = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="chats" className="flex min-h-0 flex-1 flex-col">
+        <Tabs
+          defaultValue={defaultTab}
+          className="flex min-h-0 flex-1 flex-col"
+        >
           <div className="border-b p-4">
-            <TabsList className="grid w-full grid-cols-3 bg-transparent">
-              {tabs.map((tab) => (
+            <TabsList
+              variant="line"
+              className="grid w-full grid-cols-3 bg-transparent"
+            >
+              {tabs.map((tab, index) => (
                 <TabsTrigger
+                  onClick={() => setDefaultTab(tab.value)}
                   key={tab.id}
                   value={tab.value}
-                  className="cursor-pointer"
+                  className={`cursor-pointer ${defaultTab === tab.value && "text-white! transition-all duration-100"}`}
                 >
                   <tab.icon className="mr-2 h-4 w-4" />
                   {tab.label}
