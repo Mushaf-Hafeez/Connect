@@ -83,8 +83,6 @@ const Signuppage = () => {
   const {
     register,
     handleSubmit,
-    setError,
-    clearErrors,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<SignupData>({

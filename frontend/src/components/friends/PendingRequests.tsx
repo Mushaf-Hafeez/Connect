@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input"
 import { getPendingRequests } from "@/services/friend.service"
 import PendingRequestsList from "./PendingRequestsList"
 import type { PendingRequest } from "@/types/chat"
-import Spinner from "../custom/Spinner"
 import UserSkeleton from "../custom/UserSkeleton"
 
 interface PendingRequestsProps {
