@@ -41,6 +41,42 @@ io.on("connection", (socket) => {
   // online user event
   io.emit("add-online-user", Object.keys(connectedUsers));
 
+  socket.on(
+    "typing-start",
+    ({
+      conversationId,
+      recipientId,
+    }: {
+      conversationId: string;
+      recipientId: string;
+    }) => {
+      if (!conversationId || !recipientId || recipientId === userId) return;
+
+      io.to(recipientId).emit("user-typing", {
+        conversationId,
+        senderId: userId,
+      });
+    }
+  );
+
+  socket.on(
+    "typing-stop",
+    ({
+      conversationId,
+      recipientId,
+    }: {
+      conversationId: string;
+      recipientId: string;
+    }) => {
+      if (!conversationId || !recipientId || recipientId === userId) return;
+
+      io.to(recipientId).emit("user-stopped-typing", {
+        conversationId,
+        senderId: userId,
+      });
+    }
+  );
+
   socket.on("disconnect", async () => {
     await prisma.user.update({
       where: {

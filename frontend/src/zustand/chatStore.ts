@@ -12,6 +12,7 @@ interface StoreState {
   chatSelected: Participant | null
   conversationId: string | null
   messages: Message[]
+  isTyping: boolean
 
   setIsChatSelected: (value: boolean) => void
   setChatSelected: (
@@ -27,6 +28,8 @@ interface StoreState {
   addMessage: (message: Message) => void
   removeMessage: (messageId: string) => void
   updateMessage: (messageId: string, text: string) => void
+
+  setIsTyping: (isTyping: boolean) => void
 }
 
 export const chatStore = createStore<StoreState>((set) => ({
@@ -34,6 +37,7 @@ export const chatStore = createStore<StoreState>((set) => ({
   chatSelected: null,
   conversationId: null,
   messages: [],
+  isTyping: false,
 
   setIsChatSelected: (value: boolean) => {
     set({ isChatSelected: value })
@@ -48,7 +52,12 @@ export const chatStore = createStore<StoreState>((set) => ({
     set({ conversationId })
   },
   clearChatSelected: () => {
-    set({ isChatSelected: false, chatSelected: null, conversationId: null })
+    set({
+      isChatSelected: false,
+      chatSelected: null,
+      conversationId: null,
+      isTyping: false,
+    })
   },
 
   clearMessages: () => {
@@ -87,5 +96,9 @@ export const chatStore = createStore<StoreState>((set) => ({
         message.id === messageId ? { ...message, text } : message
       ),
     }))
+  },
+
+  setIsTyping: (isTyping: boolean) => {
+    set({ isTyping })
   },
 }))

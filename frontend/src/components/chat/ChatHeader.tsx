@@ -15,7 +15,7 @@ dayjs.extend(relativeTime)
 dayjs.extend(calender)
 
 const ChatHeader = () => {
-  const { chatSelected, clearChatSelected } = useStore(chatStore)
+  const { chatSelected, clearChatSelected, isTyping } = useStore(chatStore)
   const { onlineUsers } = useStore(socketStore)
 
   const navigate = useNavigate()
@@ -57,10 +57,14 @@ const ChatHeader = () => {
 
             <p
               className={`text-xs ${
-                isOnline ? "text-green-500" : "text-muted-foreground"
+                isTyping
+                  ? "text-primary"
+                  : isOnline
+                    ? "text-green-500"
+                    : "text-muted-foreground"
               }`}
             >
-              {isOnline ? "Online" : lastSeenTime}
+              {isTyping ? "typing..." : isOnline ? "Online" : lastSeenTime}
             </p>
           </div>
         </div>

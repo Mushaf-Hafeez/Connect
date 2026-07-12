@@ -7,7 +7,8 @@ import { chatStore } from "@/zustand/chatStore"
 import { socketStore } from "@/zustand/socketStore"
 
 const ChatItem = ({ convo }: { convo: Conversation }) => {
-  const { setIsChatSelected, setChatSelected } = useStore(chatStore)
+  const { setIsChatSelected, setChatSelected, conversationId } =
+    useStore(chatStore)
   const { onlineUsers } = useStore(socketStore)
 
   const participant = convo.participants[0]
@@ -25,7 +26,7 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
   return (
     <div
       onClick={openChat}
-      className="flex cursor-pointer items-center gap-3 rounded-lg border-b p-4 transition-colors hover:bg-muted"
+      className={`mb-1 flex cursor-pointer items-center gap-3 rounded-lg border-b p-4 transition-colors hover:bg-muted ${conversationId === convo.id && "bg-muted"}`}
     >
       <Avatar className="relative">
         {onlineUsers.includes(user.id) && (
