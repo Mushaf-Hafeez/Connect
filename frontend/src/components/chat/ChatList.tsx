@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import ChatItem from "./ChatItem"
-import type { Friend } from "@/types/chat"
+import type { Friend, Message } from "@/types/chat"
 import { getConversations } from "@/services/conversation.service"
 
 import ChatListSkeleton from "./ChatListSkeleton"
@@ -26,19 +26,11 @@ export type Participant = {
   lastReadAt: Date | null
 }
 
-interface Message {
-  id: string
-  text: string | null
-  attachments: string[] | null
-  senderId: string
-  createdAt: Date
-}
-
 export interface Conversation {
   id: string
   type: "DIRECT" | "GROUP"
   participants: Participant[]
-  messages: Message
+  messages: Message[]
 }
 
 interface ChatListProps {

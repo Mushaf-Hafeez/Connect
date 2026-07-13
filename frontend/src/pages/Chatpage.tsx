@@ -5,16 +5,24 @@ import { chatStore } from "@/zustand/chatStore"
 import { useEffect } from "react"
 import { socketStore } from "@/zustand/socketStore"
 import type { Message } from "@/types/chat"
+import { conversationStore } from "@/zustand/conversationStore"
 
 const ChatPage = () => {
-  const { addMessage, isChatSelected, conversationId, chatSelected, setIsTyping } =
-    useStore(chatStore)
+  const {
+    addMessage,
+    isChatSelected,
+    conversationId,
+    chatSelected,
+    setIsTyping,
+  } = useStore(chatStore)
   const { socket } = useStore(socketStore)
+  const { updateLastMessage } = useStore(conversationStore)
 
   useEffect(() => {
     if (!socket) return
 
     const handleNewMessage = (message: Message) => {
+      updateLastMessage(message)
       if (message.conversationId !== conversationId) return
 
       if (chatSelected?.user.id === message.sender.id) {
@@ -59,7 +67,14 @@ const ChatPage = () => {
       socket.off("user-typing", handleUserTyping)
       socket.off("user-stopped-typing", handleUserStoppedTyping)
     }
-  }, [socket, addMessage, conversationId, chatSelected, setIsTyping])
+  }, [
+    socket,
+    addMessage,
+    conversationId,
+    chatSelected,
+    setIsTyping,
+    updateLastMessage,
+  ])
   return (
     <div className="h-screen bg-background">
       <div className="flex h-full">

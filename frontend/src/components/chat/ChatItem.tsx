@@ -1,10 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ImageIcon, Video, FileText } from "lucide-react"
 
 import type { Conversation } from "./ChatList"
 import { useNavigate } from "react-router-dom"
 import { useStore } from "zustand"
 import { chatStore } from "@/zustand/chatStore"
 import { socketStore } from "@/zustand/socketStore"
+import { getFileType } from "@/utils/util"
 
 const ChatItem = ({ convo }: { convo: Conversation }) => {
   const { setIsChatSelected, setChatSelected, conversationId } =
@@ -13,7 +15,13 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
 
   const participant = convo.participants[0]
   const user = participant.user
-  const lastMessage = convo.messages.at(-1)
+  const lastMessage = convo.messages[0]
+
+  const lastAttachment =
+    lastMessage?.attachments?.[lastMessage.attachments.length - 1]
+
+  const extension = lastAttachment?.split(".").pop()
+  const type = extension ? getFileType(extension) : null
 
   const navigate = useNavigate()
 
@@ -23,14 +31,60 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
     navigate(`/chat/${convo.id}`)
   }
 
+  const renderLastMessage = () => {
+    if (!lastMessage) {
+      return "No messages yet"
+    }
+
+    if (!lastAttachment) {
+      return lastMessage.text
+    }
+
+    switch (type) {
+      case "image":
+        return (
+          <span className="flex items-center gap-1">
+            <ImageIcon className="size-4" />
+            Image
+          </span>
+        )
+
+      case "video":
+        return (
+          <span className="flex items-center gap-1">
+            <Video className="size-4" />
+            Video
+          </span>
+        )
+
+      case "file":
+        return (
+          <span className="flex items-center gap-1">
+            <FileText className="size-4" />
+            PDF
+          </span>
+        )
+
+      default:
+        return (
+          <span className="flex items-center gap-1">
+            <FileText className="size-4" />
+            File
+          </span>
+        )
+    }
+  }
+
   return (
     <div
       onClick={openChat}
-      className={`mb-1 flex cursor-pointer items-center gap-3 rounded-lg border-b p-4 transition-colors hover:bg-muted ${conversationId === convo.id && "bg-muted"}`}
+      className={`mb-1 flex cursor-pointer items-center gap-3 rounded-lg border-b p-4 transition-colors hover:bg-muted ${
+        conversationId === convo.id && "bg-muted"
+      }`}
     >
       <Avatar className="relative">
         {onlineUsers.includes(user.id) && (
-          <span className="absolute top-0 left-0 size-2 rounded-full bg-primary"></span>
+          <span className="absolute top-0 left-0 size-2 rounded-full bg-primary" />
         )}
         <AvatarImage src={user.profilePic ?? undefined} />
         <AvatarFallback>
@@ -52,9 +106,9 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
           </span>
         </div>
 
-        <p className="truncate text-sm text-muted-foreground">
-          {lastMessage?.text ?? "No messages yet"}
-        </p>
+        <div className="truncate text-sm text-muted-foreground">
+          {renderLastMessage()}
+        </div>
       </div>
     </div>
   )

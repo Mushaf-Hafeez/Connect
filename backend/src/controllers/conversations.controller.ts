@@ -166,7 +166,20 @@ export const getConversations = async (
             id: true,
             text: true,
             attachments: true,
-            senderId: true,
+            sender: {
+              select: {
+                id: true,
+                displayName: true,
+                username: true,
+                profilePic: true,
+              },
+            },
+            statuses: {
+              select: {
+                userId: true,
+                status: true,
+              },
+            },
             createdAt: true,
           },
         },
