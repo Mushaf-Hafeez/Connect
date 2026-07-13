@@ -38,7 +38,7 @@ export interface Conversation {
   id: string
   type: "DIRECT" | "GROUP"
   participants: Participant[]
-  messages: Message
+  messages: Message[]
 }
 
 interface ChatListProps {
