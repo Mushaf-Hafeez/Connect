@@ -34,7 +34,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-import { EllipsisVertical, Pencil, Trash2 } from "lucide-react"
+import {
+  Check,
+  CheckCheck,
+  EllipsisVertical,
+  Pencil,
+  Trash2,
+} from "lucide-react"
 import { getFileType, getFormattedTime } from "@/utils/util"
 import AttachedVideo from "../attachment/AttachedVideo"
 import AttachedImage from "../attachment/AttachedImage"
@@ -52,6 +58,20 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
   const { displayName, profilePic } = message.sender
   const text = message.text
   const attachments = message.attachments
+
+  const messageStatus = message.statuses.find(
+    (status) => status.userId !== user?.id
+  )
+
+  const showMessageStatus = () => {
+    if (messageStatus?.status === "SENT") return <Check size={12} />
+
+    if (messageStatus?.status === "DELIVERED") return <CheckCheck size={12} />
+
+    if (messageStatus?.status === "SEEN") {
+      return <CheckCheck size={12} className="text-primary" />
+    }
+  }
 
   const isMe = message.sender.id === user?.id
 
@@ -258,7 +278,10 @@ const MessageBubble = ({ message }: { message: MessageType }) => {
             </BubbleContent>
           )}
         </Bubble>
-        <MessageFooter>{time}</MessageFooter>
+        <MessageFooter className="flex items-center gap-2">
+          {time}
+          {showMessageStatus()}
+        </MessageFooter>
       </MessageContent>
     </Message>
   )

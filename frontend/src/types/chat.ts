@@ -9,9 +9,10 @@ export interface Chat {
   avatar?: string
 }
 
-export type MessageStatus = "SENT" | "DELIVERED" | "READ"
+export type MessageStatus = "SENT" | "DELIVERED" | "SEEN"
 
 export interface MessageStatusInfo {
+  id: string
   userId: string
   status: MessageStatus
 }

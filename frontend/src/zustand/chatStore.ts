@@ -1,5 +1,5 @@
 import type { Participant } from "@/components/chat/ChatList"
-import type { Message } from "@/types/chat"
+import type { Message, MessageStatus, MessageStatusInfo } from "@/types/chat"
 import { createStore } from "zustand"
 
 const sortMessages = (messages: Message[]) =>
@@ -28,7 +28,12 @@ interface StoreState {
   addMessage: (message: Message) => void
   removeMessage: (messageId: string) => void
   updateMessage: (messageId: string, text: string) => void
-
+  updateMessageStatus: (messageId: string, status: MessageStatusInfo) => void
+  updateMessageStatusBatch: (
+    messageIds: string[],
+    userId: string,
+    status: MessageStatus
+  ) => void
   setIsTyping: (isTyping: boolean) => void
 }
 
@@ -97,8 +102,46 @@ export const chatStore = createStore<StoreState>((set) => ({
       ),
     }))
   },
+  updateMessageStatus: (messageId, status) => {
+    set((state) => ({
+      messages: state.messages.map((message) =>
+        message.id === messageId ? { ...message, statuses: [status] } : message
+      ),
+    }))
+  },
 
   setIsTyping: (isTyping: boolean) => {
     set({ isTyping })
+  },
+
+  updateMessageStatusBatch: (
+    messageIds: string[],
+    userId: string,
+    status: MessageStatus
+  ) => {
+    set((state) => ({
+      messages: state.messages.map((message) => {
+        if (!messageIds.includes(message.id)) return message
+
+        const exists = message.statuses.some((s) => s.userId === userId)
+        return {
+          ...message,
+          statuses: exists
+            ? message.statuses.map((s) =>
+                s.userId === userId ? { ...s, status } : s
+              )
+            : [
+                ...message.statuses,
+                {
+                  userId,
+                  status,
+                  id: "",
+                  messageId: message.id,
+                  updatedAt: new Date().toISOString(),
+                },
+              ],
+        }
+      }),
+    }))
   },
 }))

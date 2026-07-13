@@ -176,6 +176,7 @@ export const getConversations = async (
             },
             statuses: {
               select: {
+                id: true,
                 userId: true,
                 status: true,
               },
@@ -253,6 +254,7 @@ export const getMessages = async (
         },
         statuses: {
           select: {
+            id: true,
             userId: true,
             status: true,
           },
@@ -332,12 +334,38 @@ export const sendMessage = async (
       );
     }
 
+    const receiver = await prisma.conversationParticipant.findFirst({
+      where: {
+        conversationId,
+        userId: {
+          not: req.user.id,
+        },
+      },
+      select: {
+        user: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!receiver) {
+      throw new AppError(404, "Receipent does not exist");
+    }
+
     const message = await prisma.message.create({
       data: {
         conversationId,
         text: req.body.text,
         attachments,
         senderId: req.user.id,
+        statuses: {
+          create: {
+            userId: receiver.user.id,
+            status: "SENT",
+          },
+        },
       },
       select: {
         id: true,
@@ -355,6 +383,7 @@ export const sendMessage = async (
         },
         statuses: {
           select: {
+            id: true,
             userId: true,
             status: true,
           },
@@ -363,26 +392,9 @@ export const sendMessage = async (
     });
 
     // send message to the user using sockets
-    const receiver = await prisma.conversationParticipant.findFirst({
-      where: {
-        conversationId,
-        userId: {
-          not: req.user.id,
-        },
-      },
-      select: {
-        user: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    });
 
-    if (receiver) {
-      console.log(receiver.user.id);
-      io.to(receiver.user.id).emit("new-message", message);
-    }
+    console.log(receiver.user.id);
+    io.to(receiver.user.id).emit("new-message", message);
 
     return res.status(201).json({
       success: true,
@@ -470,6 +482,7 @@ export const updateMessage = async (
         },
         statuses: {
           select: {
+            id: true,
             userId: true,
             status: true,
           },

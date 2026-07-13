@@ -56,7 +56,7 @@ io.on("connection", (socket) => {
         conversationId,
         senderId: userId,
       });
-    }
+    },
   );
 
   socket.on(
@@ -74,8 +74,69 @@ io.on("connection", (socket) => {
         conversationId,
         senderId: userId,
       });
-    }
+    },
   );
+
+  socket.on("message-delivered", async (statusId) => {
+    const updatedStatus = await prisma.messageStatus.update({
+      where: {
+        id: statusId,
+      },
+      data: {
+        status: "DELIVERED",
+      },
+      select: {
+        id: true,
+        userId: true,
+        status: true,
+        message: {
+          select: {
+            id: true,
+            senderId: true,
+          },
+        },
+      },
+    });
+
+    socket.to(updatedStatus.message.senderId).emit("message-status-updated", {
+      messageId: updatedStatus.message.id,
+      status: {
+        id: updatedStatus.id,
+        userId: updatedStatus.userId,
+        status: updatedStatus.status,
+      },
+    });
+  });
+
+  socket.on("sync-missed-messages", async () => {
+    const missed = await prisma.messageStatus.findMany({
+      where: { userId: socket.data.userId, status: "SENT" },
+      select: { id: true, message: { select: { id: true, senderId: true } } },
+    });
+
+    if (missed.length === 0) return;
+
+    await prisma.messageStatus.updateMany({
+      where: { id: { in: missed.map((m) => m.id) } },
+      data: { status: "DELIVERED" },
+    });
+
+    // group by sender so each sender gets one batched notification
+    const bySender = missed.reduce(
+      (acc, m) => {
+        (acc[m.message.senderId] ??= []).push(m.message.id);
+        return acc;
+      },
+      {} as Record<string, string[]>,
+    );
+
+    for (const [senderId, messageIds] of Object.entries(bySender)) {
+      socket.to(senderId).emit("messages-delivered-batch", {
+        messageIds,
+        userId: socket.data.userId,
+      });
+    }
+  });
 
   socket.on("disconnect", async () => {
     await prisma.user.update({
