@@ -32,6 +32,7 @@ export const socketStore = create<SocketState>((set, get) => ({
 
     socket.on("connect", () => {
       // console.log("socket connected: ", socket.id)
+      socket.emit("sync-missed-messages")
     })
 
     set({ socket })

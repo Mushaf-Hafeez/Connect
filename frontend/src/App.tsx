@@ -18,8 +18,10 @@ import { userStore } from "./zustand/userStore"
 import { useEffect } from "react"
 import { checkAuth } from "./services/auth.service"
 import { socketStore } from "./zustand/socketStore"
+import { chatStore } from "./zustand/chatStore"
 
 const App = () => {
+  const { updateMessageStatusBatch } = useStore(chatStore)
   const { user, isCheckingAuth, setIsCheckingAuth, setUser, clearUser } =
     useStore(userStore)
   const {
@@ -67,10 +69,19 @@ const App = () => {
 
     socket.on("add-online-user", (userIds) => setOnlineUsers(userIds))
     socket.on("remove-online-user", (userId) => removeOnlineUser(userId))
+    const handleMessagesDeliveredBatch = (data: {
+      messageIds: string[]
+      userId: string
+    }) => {
+      updateMessageStatusBatch(data.messageIds, data.userId, "DELIVERED")
+    }
+
+    socket.on("messages-delivered-batch", handleMessagesDeliveredBatch)
 
     return () => {
       socket.off("add-online-user")
       socket.off("remove-online-user")
+      socket.off("messages-delivered-batch")
     }
   }, [socket])
 
