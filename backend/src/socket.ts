@@ -110,7 +110,7 @@ io.on("connection", (socket) => {
 
   socket.on("sync-missed-messages", async () => {
     const missed = await prisma.messageStatus.findMany({
-      where: { userId: socket.data.userId, status: "SENT" },
+      where: { userId, status: "SENT" },
       select: { id: true, message: { select: { id: true, senderId: true } } },
     });
 
@@ -133,7 +133,7 @@ io.on("connection", (socket) => {
     for (const [senderId, messageIds] of Object.entries(bySender)) {
       socket.to(senderId).emit("messages-delivered-batch", {
         messageIds,
-        userId: socket.data.userId,
+        userId,
       });
     }
   });
