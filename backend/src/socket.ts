@@ -138,6 +138,48 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("messages-seen", async (id) => {
+    const notSeenMessages = await prisma.messageStatus.findMany({
+      where: {
+        message: {
+          conversationId: id,
+        },
+        userId,
+        status: { not: "SEEN" },
+      },
+    });
+
+    if (notSeenMessages.length === 0) return;
+
+    const updatedStatus = await prisma.messageStatus.updateManyAndReturn({
+      where: {
+        id: { in: notSeenMessages.map((m) => m.id) },
+      },
+      data: {
+        status: "SEEN",
+      },
+      select: {
+        id: true,
+        message: {
+          select: {
+            id: true,
+            senderId: true,
+          },
+        },
+      },
+    });
+
+    const sender = updatedStatus[0]?.message.senderId;
+
+    if (!sender) return;
+
+    socket.to(sender).emit("update-messages-seen", {
+      messageIds: updatedStatus.map((u) => u.message.id),
+      userId,
+      status: "SEEN",
+    });
+  });
+
   socket.on("disconnect", async () => {
     await prisma.user.update({
       where: {
