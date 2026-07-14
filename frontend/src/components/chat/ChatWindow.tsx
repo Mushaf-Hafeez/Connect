@@ -17,14 +17,19 @@ import { useStore } from "zustand/react"
 import MessageBubble from "./MessageBubble"
 import TypingIndicator from "./TypingIndicator"
 import { chatStore } from "@/zustand/chatStore"
+import { socketStore } from "@/zustand/socketStore"
+import type { MessageStatus } from "@/types/chat"
 
 const ChatWindow = () => {
+  const { socket } = useStore(socketStore)
+
   const {
     messages,
     addMessages,
     prependMessages,
     clearMessages,
     setIsTyping,
+    updateMessageStatusToSeen,
     isTyping,
   } = useStore(chatStore)
   const setConversationId = useStore(
@@ -75,6 +80,30 @@ const ChatWindow = () => {
       fetchMessages()
     }
   }, [addMessages, clearMessages, id])
+
+  // useEffect to change the message status to seen
+  useEffect(() => {
+    if (!socket || !id) return
+
+    socket.emit("messages-seen", id)
+
+    const handleMessageStatusToSeen = (data: {
+      messageIds: string[]
+      userId: string
+      status: MessageStatus
+    }) => {
+      console.log(
+        "messages has been read on the client side after status update in db"
+      )
+      updateMessageStatusToSeen(data.messageIds, data.userId, data.status)
+    }
+
+    socket.on("update-messages-seen", handleMessageStatusToSeen)
+
+    return () => {
+      socket.off("update-messages-seen", handleMessageStatusToSeen)
+    }
+  }, [socket, id, updateMessageStatusToSeen, messages])
 
   const fetchOlderMessages = async () => {
     if (!id || isFetchingOlder || !hasMore) return
