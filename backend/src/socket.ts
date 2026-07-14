@@ -110,7 +110,7 @@ io.on("connection", (socket) => {
 
   socket.on("sync-missed-messages", async () => {
     const missed = await prisma.messageStatus.findMany({
-      where: { userId: socket.data.userId, status: "SENT" },
+      where: { userId, status: "SENT" },
       select: { id: true, message: { select: { id: true, senderId: true } } },
     });
 
@@ -133,9 +133,51 @@ io.on("connection", (socket) => {
     for (const [senderId, messageIds] of Object.entries(bySender)) {
       socket.to(senderId).emit("messages-delivered-batch", {
         messageIds,
-        userId: socket.data.userId,
+        userId,
       });
     }
+  });
+
+  socket.on("messages-seen", async (id) => {
+    const notSeenMessages = await prisma.messageStatus.findMany({
+      where: {
+        message: {
+          conversationId: id,
+        },
+        userId,
+        status: { not: "SEEN" },
+      },
+    });
+
+    if (notSeenMessages.length === 0) return;
+
+    const updatedStatus = await prisma.messageStatus.updateManyAndReturn({
+      where: {
+        id: { in: notSeenMessages.map((m) => m.id) },
+      },
+      data: {
+        status: "SEEN",
+      },
+      select: {
+        id: true,
+        message: {
+          select: {
+            id: true,
+            senderId: true,
+          },
+        },
+      },
+    });
+
+    const sender = updatedStatus[0]?.message.senderId;
+
+    if (!sender) return;
+
+    socket.to(sender).emit("update-messages-seen", {
+      messageIds: updatedStatus.map((u) => u.message.id),
+      userId,
+      status: "SEEN",
+    });
   });
 
   socket.on("disconnect", async () => {

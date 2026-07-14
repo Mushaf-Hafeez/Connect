@@ -1,33 +1,10 @@
-import Spinner from "@/components/custom/Spinner"
 import { Button } from "@/components/ui/button"
-import { logout } from "@/services/auth.service"
 import { userStore } from "@/zustand/userStore"
-import { useState } from "react"
-import toast from "react-hot-toast"
 import { Link } from "react-router-dom"
 import { useStore } from "zustand"
 
 const Homepage = () => {
-  const { user, clearUser } = useStore(userStore)
-
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
-  const handleLogout = async () => {
-    setIsLoading(true)
-
-    try {
-      const response = await logout()
-
-      if (response.status === 200) {
-        clearUser()
-      }
-    } catch (error) {
-      console.log("error while logging out in homepage: ", error)
-      toast.error(error.response.data.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const { user } = useStore(userStore)
 
   return (
     <div className="flex-center min-h-screen w-full">
@@ -37,15 +14,6 @@ const Homepage = () => {
           <div className="space-x-2">
             <Button asChild>
               <Link to={"/chat"}>Open chat</Link>
-            </Button>
-            <Button
-              disabled={isLoading}
-              variant={"destructive"}
-              onClick={handleLogout}
-              className="cursor-pointer"
-            >
-              {isLoading && <Spinner />}
-              Logout
             </Button>
           </div>
         </div>

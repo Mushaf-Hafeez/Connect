@@ -29,6 +29,11 @@ interface StoreState {
   removeMessage: (messageId: string) => void
   updateMessage: (messageId: string, text: string) => void
   updateMessageStatus: (messageId: string, status: MessageStatusInfo) => void
+  updateMessageStatusToSeen: (
+    messageIds: string[],
+    userId: string,
+    status: MessageStatus
+  ) => void
   updateMessageStatusBatch: (
     messageIds: string[],
     userId: string,
@@ -106,6 +111,21 @@ export const chatStore = createStore<StoreState>((set) => ({
     set((state) => ({
       messages: state.messages.map((message) =>
         message.id === messageId ? { ...message, statuses: [status] } : message
+      ),
+    }))
+  },
+
+  updateMessageStatusToSeen: (messageIds, userId, status) => {
+    set((state) => ({
+      messages: state.messages.map((message) =>
+        !messageIds.includes(message.id)
+          ? message
+          : {
+              ...message,
+              statuses: message.statuses.map((s) =>
+                s.userId === userId ? { ...s, status } : s
+              ),
+            }
       ),
     }))
   },
