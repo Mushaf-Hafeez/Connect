@@ -19,7 +19,7 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
   const participant = convo.participants[0]
   const user = participant.user
   const lastMessage = convo.messages[0]
-
+  const unReadMessages = convo._count?.messages
   const isSenderMe = lastMessage && lastMessage.sender.id === authUser!.id
 
   const lastAttachment =
@@ -130,7 +130,9 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <p className="py-.5 w-fit self-end rounded-full bg-primary px-1.5">3</p>
+        <p className="py-.5 w-fit self-end rounded-full bg-primary px-1.5">
+          {unReadMessages !== 0 && unReadMessages}
+        </p>
         <p className="text-xs text-muted-foreground">{formattedTime}</p>
       </div>
     </div>
