@@ -33,7 +33,8 @@ const ChatWindow = () => {
     updateMessageStatusToSeen,
     isTyping,
   } = useStore(chatStore)
-  const { updateLastMessageStatus } = useStore(conversationStore)
+  const { updateLastMessageStatus, resetUnreadCount } =
+    useStore(conversationStore)
   const setConversationId = useStore(
     chatStore,
     (state) => state.setConversationId
@@ -99,6 +100,10 @@ const ChatWindow = () => {
       )
       updateMessageStatusToSeen(data.messageIds, data.userId, data.status)
 
+      if (id) {
+        resetUnreadCount(id)
+      }
+
       for (const messageId of data.messageIds) {
         updateLastMessageStatus(messageId, data.status)
       }
@@ -109,7 +114,14 @@ const ChatWindow = () => {
     return () => {
       socket.off("update-messages-seen", handleMessageStatusToSeen)
     }
-  }, [socket, id, updateMessageStatusToSeen, messages, updateLastMessageStatus])
+  }, [
+    socket,
+    id,
+    updateMessageStatusToSeen,
+    messages,
+    updateLastMessageStatus,
+    resetUnreadCount,
+  ])
 
   const fetchOlderMessages = async () => {
     if (!id || isFetchingOlder || !hasMore) return

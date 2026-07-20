@@ -16,9 +16,19 @@ const ChatPage = () => {
     setIsTyping,
   } = useStore(chatStore)
   const { socket } = useStore(socketStore)
-  const { updateLastMessage, updateLastMessageStatus } =
-    useStore(conversationStore)
+  const {
+    updateLastMessage,
+    updateLastMessageStatus,
+    incrementUnreadCount,
+    resetUnreadCount,
+  } = useStore(conversationStore)
   const { updateMessageStatus } = useStore(chatStore)
+
+  useEffect(() => {
+    if (conversationId) {
+      resetUnreadCount(conversationId)
+    }
+  }, [conversationId, resetUnreadCount])
 
   useEffect(() => {
     if (!socket) return
@@ -27,6 +37,11 @@ const ChatPage = () => {
       //emit message-delivered event
       socket.emit("message-delivered", message.statuses[0].id)
       updateLastMessage(message)
+
+      if (message.conversationId && message.conversationId !== conversationId) {
+        incrementUnreadCount(message.conversationId)
+      }
+
       if (message.conversationId !== conversationId) return
 
       if (chatSelected?.user.id === message.sender.id) {
@@ -88,6 +103,10 @@ const ChatPage = () => {
     chatSelected,
     setIsTyping,
     updateLastMessage,
+    updateLastMessageStatus,
+    incrementUnreadCount,
+    updateMessageStatus,
+    resetUnreadCount,
   ])
   return (
     <div className="h-screen bg-background">

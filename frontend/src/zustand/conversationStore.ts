@@ -13,6 +13,8 @@ interface StoreState {
     messageId: string,
     messageStatus: MessageStatus
   ) => void
+  incrementUnreadCount: (conversationId: string) => void
+  resetUnreadCount: (conversationId: string) => void
 
   clearConversations: () => void
 }
@@ -57,6 +59,36 @@ export const conversationStore = createStore<StoreState>((set) => ({
                     }
                   : message
               ),
+            }
+          : conversation
+      ),
+    }))
+  },
+
+  incrementUnreadCount: (conversationId) => {
+    set((state) => ({
+      conversations: state.conversations?.map((conversation) =>
+        conversation.id === conversationId
+          ? {
+              ...conversation,
+              _count: {
+                messages: (conversation._count?.messages ?? 0) + 1,
+              },
+            }
+          : conversation
+      ),
+    }))
+  },
+
+  resetUnreadCount: (conversationId) => {
+    set((state) => ({
+      conversations: state.conversations?.map((conversation) =>
+        conversation.id === conversationId
+          ? {
+              ...conversation,
+              _count: {
+                messages: 0,
+              },
             }
           : conversation
       ),
