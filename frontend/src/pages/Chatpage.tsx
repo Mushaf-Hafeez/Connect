@@ -67,7 +67,7 @@ const ChatPage = () => {
       status: MessageStatusInfo
     }) => {
       updateMessageStatus(data.messageId, data.status)
-      updateLastMessageStatus(data.messageId, data.status)
+      updateLastMessageStatus(data.messageId, data.status.status)
     }
 
     socket.on("new-message", handleNewMessage)
