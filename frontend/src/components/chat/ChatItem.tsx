@@ -1,12 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ImageIcon, Video, FileText } from "lucide-react"
+import { ImageIcon, Video, FileText, Check, CheckCheck } from "lucide-react"
 
 import type { Conversation } from "./ChatList"
 import { useNavigate } from "react-router-dom"
 import { useStore } from "zustand"
 import { chatStore } from "@/zustand/chatStore"
 import { socketStore } from "@/zustand/socketStore"
-import { getFileType } from "@/utils/util"
+import { formatWhatsAppTime, getFileType } from "@/utils/util"
+import type { MessageStatusInfo } from "@/types/chat"
 
 const ChatItem = ({ convo }: { convo: Conversation }) => {
   const { setIsChatSelected, setChatSelected, conversationId } =
@@ -25,10 +26,24 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
 
   const navigate = useNavigate()
 
+  const formattedTime = formatWhatsAppTime(lastMessage?.createdAt)
+
   const openChat = () => {
     setIsChatSelected(true)
     setChatSelected(participant, convo.id)
     navigate(`/chat/${convo.id}`)
+  }
+
+  const messageStatus: MessageStatusInfo = convo?.messages[0]?.statuses[0]
+
+  const showMessageStatus = () => {
+    if (messageStatus?.status === "SENT") return <Check size={12} />
+
+    if (messageStatus?.status === "DELIVERED") return <CheckCheck size={12} />
+
+    if (messageStatus?.status === "SEEN") {
+      return <CheckCheck size={12} className="text-primary" />
+    }
   }
 
   const renderLastMessage = () => {
@@ -91,7 +106,6 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
           {user.displayName.charAt(0).toUpperCase()}
         </AvatarFallback>
       </Avatar>
-
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
           <h3 className="truncate font-medium">{user.displayName}</h3>
@@ -106,9 +120,14 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
           </span>
         </div>
 
-        <div className="truncate text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 truncate text-sm text-muted-foreground">
+          {showMessageStatus()}
           {renderLastMessage()}
         </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <p className="py-.5 w-fit self-end rounded-full bg-primary px-1.5">3</p>
+        <p className="text-xs text-muted-foreground">{formattedTime}</p>
       </div>
     </div>
   )
