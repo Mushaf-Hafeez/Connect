@@ -31,6 +31,9 @@ export interface Conversation {
   type: "DIRECT" | "GROUP"
   participants: Participant[]
   messages: Message[]
+  _count?: {
+    messages: number
+  }
 }
 
 interface ChatListProps {

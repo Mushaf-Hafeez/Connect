@@ -184,6 +184,22 @@ export const getConversations = async (
             createdAt: true,
           },
         },
+        _count: {
+          select: {
+            messages: {
+              where: {
+                statuses: {
+                  some: {
+                    userId: req.user.id,
+                    status: {
+                      not: "SEEN",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       orderBy: {
         updatedAt: "desc",

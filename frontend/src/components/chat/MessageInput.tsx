@@ -10,11 +10,13 @@ import { useParams } from "react-router-dom"
 import { useStore } from "zustand"
 import { chatStore } from "@/zustand/chatStore"
 import { socketStore } from "@/zustand/socketStore"
+import { conversationStore } from "@/zustand/conversationStore"
 
 const TYPING_STOP_DELAY_MS = 2000
 
 const MessageInput = () => {
   const { addMessage, conversationId, chatSelected } = useStore(chatStore)
+  const { updateLastMessage } = useStore(conversationStore)
   const { socket } = useStore(socketStore)
 
   const [message, setMessage] = useState("")
@@ -124,6 +126,7 @@ const MessageInput = () => {
       if (response.status === 201) {
         console.log("Message sent successfully:", response.data)
         addMessage(response.data.message)
+        updateLastMessage(response.data.message)
         setMessage("")
         setAttachments([])
       }

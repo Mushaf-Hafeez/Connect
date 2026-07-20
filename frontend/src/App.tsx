@@ -19,6 +19,7 @@ import { useEffect } from "react"
 import { checkAuth } from "./services/auth.service"
 import { socketStore } from "./zustand/socketStore"
 import { chatStore } from "./zustand/chatStore"
+import { conversationStore } from "./zustand/conversationStore"
 
 const App = () => {
   const { updateMessageStatusBatch } = useStore(chatStore)
@@ -31,6 +32,7 @@ const App = () => {
     setOnlineUsers,
     removeOnlineUser,
   } = useStore(socketStore)
+  const { updateLastMessageStatus } = useStore(conversationStore)
 
   const navigate = useNavigate()
 
@@ -74,6 +76,9 @@ const App = () => {
       userId: string
     }) => {
       updateMessageStatusBatch(data.messageIds, data.userId, "DELIVERED")
+      for (const messageId of data.messageIds) {
+        updateLastMessageStatus(messageId, "DELIVERED")
+      }
     }
 
     socket.on("messages-delivered-batch", handleMessagesDeliveredBatch)

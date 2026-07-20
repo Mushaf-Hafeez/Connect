@@ -19,6 +19,7 @@ import TypingIndicator from "./TypingIndicator"
 import { chatStore } from "@/zustand/chatStore"
 import { socketStore } from "@/zustand/socketStore"
 import type { MessageStatus } from "@/types/chat"
+import { conversationStore } from "@/zustand/conversationStore"
 
 const ChatWindow = () => {
   const { socket } = useStore(socketStore)
@@ -32,6 +33,8 @@ const ChatWindow = () => {
     updateMessageStatusToSeen,
     isTyping,
   } = useStore(chatStore)
+  const { updateLastMessageStatus, resetUnreadCount } =
+    useStore(conversationStore)
   const setConversationId = useStore(
     chatStore,
     (state) => state.setConversationId
@@ -96,6 +99,14 @@ const ChatWindow = () => {
         "messages has been read on the client side after status update in db"
       )
       updateMessageStatusToSeen(data.messageIds, data.userId, data.status)
+
+      if (id) {
+        resetUnreadCount(id)
+      }
+
+      for (const messageId of data.messageIds) {
+        updateLastMessageStatus(messageId, data.status)
+      }
     }
 
     socket.on("update-messages-seen", handleMessageStatusToSeen)
@@ -103,7 +114,14 @@ const ChatWindow = () => {
     return () => {
       socket.off("update-messages-seen", handleMessageStatusToSeen)
     }
-  }, [socket, id, updateMessageStatusToSeen, messages])
+  }, [
+    socket,
+    id,
+    updateMessageStatusToSeen,
+    messages,
+    updateLastMessageStatus,
+    resetUnreadCount,
+  ])
 
   const fetchOlderMessages = async () => {
     if (!id || isFetchingOlder || !hasMore) return
