@@ -8,8 +8,10 @@ import { chatStore } from "@/zustand/chatStore"
 import { socketStore } from "@/zustand/socketStore"
 import { formatWhatsAppTime, getFileType } from "@/utils/util"
 import type { MessageStatusInfo } from "@/types/chat"
+import { userStore } from "@/zustand/userStore"
 
 const ChatItem = ({ convo }: { convo: Conversation }) => {
+  const { user: authUser } = useStore(userStore)
   const { setIsChatSelected, setChatSelected, conversationId } =
     useStore(chatStore)
   const { onlineUsers } = useStore(socketStore)
@@ -17,6 +19,8 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
   const participant = convo.participants[0]
   const user = participant.user
   const lastMessage = convo.messages[0]
+
+  const isSenderMe = lastMessage && lastMessage.sender.id === authUser!.id
 
   const lastAttachment =
     lastMessage?.attachments?.[lastMessage.attachments.length - 1]
@@ -121,7 +125,7 @@ const ChatItem = ({ convo }: { convo: Conversation }) => {
         </div>
 
         <div className="flex items-center gap-2 truncate text-sm text-muted-foreground">
-          {showMessageStatus()}
+          {isSenderMe && showMessageStatus()}
           {renderLastMessage()}
         </div>
       </div>

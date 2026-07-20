@@ -1,5 +1,5 @@
 import type { Conversation } from "@/components/chat/ChatList"
-import type { Message } from "@/types/chat"
+import type { Message, MessageStatusInfo } from "@/types/chat"
 import { createStore } from "zustand"
 
 interface StoreState {
@@ -9,6 +9,10 @@ interface StoreState {
   addConversation: (conversation: Conversation) => void
 
   updateLastMessage: (message: Message) => void
+  updateLastMessageStatus: (
+    messageId: string,
+    messageStatus: MessageStatusInfo
+  ) => void
 
   clearConversations: () => void
 }
@@ -31,6 +35,30 @@ export const conversationStore = createStore<StoreState>((set) => ({
       conversations: state.conversations?.map((conversation) =>
         conversation.id === message.conversationId
           ? { ...conversation, messages: [message] }
+          : conversation
+      ),
+    }))
+  },
+
+  updateLastMessageStatus: (messageId, messageStatus) => {
+    set((state) => ({
+      conversations: state.conversations?.map((conversation) =>
+        conversation.messages[0]?.id === messageId
+          ? {
+              ...conversation,
+              messages: conversation.messages.map((message) =>
+                message.id === messageId
+                  ? {
+                      ...message,
+                      statuses: message.statuses.map((s) =>
+                        s.id === messageStatus.id
+                          ? { ...s, status: messageStatus.status }
+                          : s
+                      ),
+                    }
+                  : message
+              ),
+            }
           : conversation
       ),
     }))

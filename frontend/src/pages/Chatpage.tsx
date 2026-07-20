@@ -16,7 +16,8 @@ const ChatPage = () => {
     setIsTyping,
   } = useStore(chatStore)
   const { socket } = useStore(socketStore)
-  const { updateLastMessage } = useStore(conversationStore)
+  const { updateLastMessage, updateLastMessageStatus } =
+    useStore(conversationStore)
   const { updateMessageStatus } = useStore(chatStore)
 
   useEffect(() => {
@@ -66,6 +67,7 @@ const ChatPage = () => {
       status: MessageStatusInfo
     }) => {
       updateMessageStatus(data.messageId, data.status)
+      updateLastMessageStatus(data.messageId, data.status)
     }
 
     socket.on("new-message", handleNewMessage)
