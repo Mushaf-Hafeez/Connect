@@ -1,8 +1,13 @@
 import { Link } from "react-router-dom"
 
 import { Button } from "../components/ui/button"
+import toast from "react-hot-toast"
 
 const Errorpage = () => {
+  const showToast = () => {
+    toast("new toast")
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground">
       <div className="w-full max-w-xl rounded-3xl border border-border/70 bg-card/80 p-8 text-center shadow-2xl shadow-black/10 backdrop-blur sm:p-10">
@@ -26,6 +31,7 @@ const Errorpage = () => {
           <Button asChild size="lg" className="w-full sm:w-auto">
             <Link to="/">Go home</Link>
           </Button>
+          <Button onClick={showToast}>Show toast</Button>
           <Button variant="outline" size="lg" className="w-full sm:w-auto">
             <Link to="/chat">Open chats</Link>
           </Button>

@@ -6,6 +6,7 @@ import { useEffect } from "react"
 import { socketStore } from "@/zustand/socketStore"
 import type { Message, MessageStatusInfo } from "@/types/chat"
 import { conversationStore } from "@/zustand/conversationStore"
+import toast from "react-hot-toast"
 
 const ChatPage = () => {
   const {
@@ -14,6 +15,7 @@ const ChatPage = () => {
     conversationId,
     chatSelected,
     setIsTyping,
+    updateMessageStatus,
   } = useStore(chatStore)
   const { socket } = useStore(socketStore)
   const {
@@ -22,7 +24,6 @@ const ChatPage = () => {
     incrementUnreadCount,
     resetUnreadCount,
   } = useStore(conversationStore)
-  const { updateMessageStatus } = useStore(chatStore)
 
   useEffect(() => {
     if (conversationId) {
@@ -34,7 +35,9 @@ const ChatPage = () => {
     if (!socket) return
 
     const handleNewMessage = (message: Message) => {
-      //emit message-delivered event
+      if (conversationId !== message.conversationId) {
+        toast.success(`new message from ${message.sender.displayName}`)
+      }
       socket.emit("message-delivered", message.statuses[0].id)
       updateLastMessage(message)
 
