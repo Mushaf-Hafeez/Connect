@@ -1,10 +1,9 @@
 import { useParams } from "react-router-dom"
 import ChatHeader from "./ChatHeader"
 import MessageInput from "./MessageInput"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { getMessages } from "@/services/conversation.service"
 import { Skeleton } from "@/components/ui/skeleton"
-import InfiniteScroll from "react-infinite-scroll-component"
 import {
   MessageScroller,
   MessageScrollerButton,
@@ -44,8 +43,10 @@ const ChatWindow = () => {
   const [hasMore, setHasMore] = useState(true)
   const [isFetchingOlder, setIsFetchingOlder] = useState(false)
   const viewportRef = useRef<HTMLDivElement | null>(null)
-
   const scrollerRef = useRef<HTMLDivElement | null>(null)
+
+  const shouldRestoreScrollRef = useRef(false)
+  const prevScrollHeightRef = useRef(0)
 
   const params = useParams()
   const id = params.id
@@ -84,7 +85,6 @@ const ChatWindow = () => {
     }
   }, [addMessages, clearMessages, id])
 
-  // useEffect to change the message status to seen
   useEffect(() => {
     if (!socket || !id) return
 
@@ -95,9 +95,6 @@ const ChatWindow = () => {
       userId: string
       status: MessageStatus
     }) => {
-      console.log(
-        "messages has been read on the client side after status update in db"
-      )
       updateMessageStatusToSeen(data.messageIds, data.userId, data.status)
 
       if (id) {
@@ -126,6 +123,7 @@ const ChatWindow = () => {
   const fetchOlderMessages = async () => {
     if (!id || isFetchingOlder || !hasMore) return
 
+    const viewport = viewportRef.current
     setIsFetchingOlder(true)
 
     try {
@@ -135,6 +133,10 @@ const ChatWindow = () => {
         const olderMessages = response.data.messages
 
         if (olderMessages.length > 0) {
+          if (viewport) {
+            prevScrollHeightRef.current = viewport.scrollHeight
+            shouldRestoreScrollRef.current = true
+          }
           prependMessages(olderMessages)
           setPage((prev) => prev + 1)
           setHasMore(response.data.hasMore)
@@ -150,12 +152,33 @@ const ChatWindow = () => {
   }
 
   useEffect(() => {
-    if (scrollerRef.current) {
-      scrollerRef.current.scrollTo({
-        top: scrollerRef.current.scrollHeight,
-        behavior: "smooth",
-      })
+    const viewport = viewportRef.current
+    if (!viewport || isLoading) return
+
+    const handleScroll = () => {
+      if (viewport.scrollTop < 80) {
+        fetchOlderMessages()
+      }
     }
+
+    viewport.addEventListener("scroll", handleScroll)
+    return () => viewport.removeEventListener("scroll", handleScroll)
+  }, [id, page, hasMore, isFetchingOlder, isLoading])
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+
+    if (shouldRestoreScrollRef.current) {
+      viewport.scrollTop = viewport.scrollHeight - prevScrollHeightRef.current
+      shouldRestoreScrollRef.current = false
+      return
+    }
+
+    viewport.scrollTo({
+      top: viewport.scrollHeight,
+      behavior: "smooth",
+    })
   }, [messages, isTyping])
 
   return (
@@ -201,32 +224,22 @@ const ChatWindow = () => {
                 className="scrollbar-none"
                 id="chat-scroll-view"
               >
-                <InfiniteScroll
-                  dataLength={messages.length}
-                  next={fetchOlderMessages}
-                  hasMore={hasMore}
-                  loader={
+                <MessageScrollerContent ref={scrollerRef}>
+                  {isFetchingOlder && (
                     <div className="py-2 text-center text-xs text-muted-foreground">
                       Loading older messages...
                     </div>
-                  }
-                  reverse={true}
-                  inverse={false}
-                  style={{ display: "flex", flexDirection: "column" }}
-                  scrollableTarget="chat-scroll-view"
-                  scrollThreshold={0.8}
-                >
-                  <MessageScrollerContent ref={scrollerRef}>
-                    {messages.map((message) => (
-                      <MessageScrollerItem
-                        key={message.id}
-                        messageId={message.id}
-                      >
-                        <MessageBubble message={message} />
-                      </MessageScrollerItem>
-                    ))}
-                  </MessageScrollerContent>
-                </InfiniteScroll>
+                  )}
+
+                  {messages.map((message) => (
+                    <MessageScrollerItem
+                      key={message.id}
+                      messageId={message.id}
+                    >
+                      <MessageBubble message={message} />
+                    </MessageScrollerItem>
+                  ))}
+                </MessageScrollerContent>
               </MessageScrollerViewport>
               <MessageScrollerButton />
             </MessageScroller>
