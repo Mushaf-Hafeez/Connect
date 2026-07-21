@@ -2,7 +2,7 @@ import ChatSidebar from "@/components/chat/ChatSidebar"
 import { Outlet } from "react-router-dom"
 import { useStore } from "zustand"
 import { chatStore } from "@/zustand/chatStore"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { socketStore } from "@/zustand/socketStore"
 import type { Message, MessageStatusInfo } from "@/types/chat"
 import { conversationStore } from "@/zustand/conversationStore"
@@ -25,6 +25,8 @@ const ChatPage = () => {
     resetUnreadCount,
   } = useStore(conversationStore)
 
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
   useEffect(() => {
     if (conversationId) {
       resetUnreadCount(conversationId)
@@ -35,6 +37,11 @@ const ChatPage = () => {
     if (!socket) return
 
     const handleNewMessage = (message: Message) => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 1
+        audioRef.current.play()
+      }
+
       if (conversationId !== message.conversationId) {
         toast.success(`new message from ${message.sender.displayName}`)
       }
@@ -127,6 +134,8 @@ const ChatPage = () => {
         >
           <Outlet />
         </div>
+
+        <audio ref={audioRef} src="/notification.mp3"></audio>
       </div>
     </div>
   )
