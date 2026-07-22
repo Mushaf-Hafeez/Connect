@@ -185,9 +185,9 @@ export const login = async (
     } else {
       const payload = {
         id: user.id,
-        username: user.username,
-        email: user.email,
-        isEmailVerified: user.isEmailVerified,
+        // username: user.username,
+        // email: user.email,
+        // isEmailVerified: user.isEmailVerified,
       };
 
       const token: string = generateJWT(payload);

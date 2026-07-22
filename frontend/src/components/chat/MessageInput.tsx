@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { FileText, Plus, SendHorizontal, Video, X } from "lucide-react"
 
+import imageCompression from "browser-image-compression"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -112,14 +114,26 @@ const MessageInput = () => {
 
       formData.append("text", message)
 
-      attachments.forEach((file) => {
-        formData.append("attachments", file)
-      })
+      const options = {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 720,
+        useWebWorker: true,
+      }
 
-      console.log({
-        message,
-        attachments,
-      })
+      for (const file of attachments) {
+        let fileToAppend = file
+
+        // Compress only if the file is an image
+        if (file.type.startsWith("image/")) {
+          try {
+            fileToAppend = await imageCompression(file, options)
+          } catch (error) {
+            console.error("Compression failed, using original file:", error)
+          }
+        }
+
+        formData.append("attachments", fileToAppend)
+      }
 
       const response = await sendMessage(params.id as string, formData)
 

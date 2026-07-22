@@ -32,6 +32,7 @@ export const storage = new CloudinaryStorage({
       // Documents
       "pdf",
     ],
+    transformations: [{ width: 1280, height: 720 }, { quality: "auto" }],
     resource_type: "auto",
   }),
 });
