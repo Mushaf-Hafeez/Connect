@@ -36,7 +36,7 @@ export const isAuth = async (
 
     const user = await prisma.user.findUnique({
       where: {
-        email: decode.email,
+        id: decode.id,
       },
       select: {
         id: true,

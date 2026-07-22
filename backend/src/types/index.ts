@@ -8,9 +8,9 @@ export interface CustomError extends Error {
 
 export interface Payload {
   id: string;
-  username: string;
-  email: string;
-  isEmailVerified: boolean;
+  // username: string;
+  // email: string;
+  // isEmailVerified: boolean;
 }
 declare global {
   namespace Express {

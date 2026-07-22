@@ -334,37 +334,36 @@ export const sendMessage = async (
       files.map((file) => attachments.push(file.path));
     }
 
-    const participant = await prisma.conversationParticipant.findUnique({
+    const participants = await prisma.conversationParticipant.findMany({
       where: {
-        userId_conversationId: {
-          conversationId,
-          userId: req.user.id,
+        conversationId,
+      },
+      select: {
+        user: {
+          select: {
+            id: true,
+            displayName: true,
+            username: true,
+            profilePic: true,
+          },
         },
       },
     });
 
-    if (!participant) {
+    const sender = participants.find(
+      (participant) => participant.user.id === req.user.id,
+    );
+
+    if (!sender) {
       throw new AppError(
         403,
         "You are not a participant of this conversation.",
       );
     }
 
-    const receiver = await prisma.conversationParticipant.findFirst({
-      where: {
-        conversationId,
-        userId: {
-          not: req.user.id,
-        },
-      },
-      select: {
-        user: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    });
+    const receiver = participants.find(
+      (participant) => participant.user.id !== req.user.id,
+    );
 
     if (!receiver) {
       throw new AppError(404, "Receipent does not exist");
@@ -389,14 +388,6 @@ export const sendMessage = async (
         attachments: true,
         createdAt: true,
         conversationId: true,
-        sender: {
-          select: {
-            id: true,
-            displayName: true,
-            username: true,
-            profilePic: true,
-          },
-        },
         statuses: {
           select: {
             id: true,
@@ -407,14 +398,14 @@ export const sendMessage = async (
       },
     });
 
-    // send message to the user using sockets
+    const newMessage = { ...message, sender: { ...sender.user } };
 
-    console.log(receiver.user.id);
-    io.to(receiver.user.id).emit("new-message", message);
+    // send message to the user using sockets
+    io.to(receiver.user.id).emit("new-message", newMessage);
 
     return res.status(201).json({
       success: true,
-      message,
+      message: newMessage,
     });
   } catch (error) {
     next(error);
