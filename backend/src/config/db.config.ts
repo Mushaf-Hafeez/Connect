@@ -10,17 +10,17 @@ const adapter = new PrismaNeon({
 
 const prisma = new PrismaClient({
   adapter,
-  log: [
-    {
-      emit: "event",
-      level: "query",
-    },
-  ],
+  // log: [
+  //   {
+  //     emit: "event",
+  //     level: "query",
+  //   },
+  //  ],
 });
 
-prisma.$on("query", (e) => {
-  console.log("Query: " + e.query);
-  console.log("Duration: " + e.duration + "ms");
-});
+// prisma.$on("query", (e) => {
+//   console.log("Query: " + e.query);
+//   console.log("Duration: " + e.duration + "ms");
+// });
 
 export default prisma;
