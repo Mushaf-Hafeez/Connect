@@ -20,6 +20,7 @@ import { checkAuth } from "./services/auth.service"
 import { socketStore } from "./zustand/socketStore"
 import { chatStore } from "./zustand/chatStore"
 import { conversationStore } from "./zustand/conversationStore"
+import Settingspage from "./pages/Settingspage"
 
 const App = () => {
   const { updateMessageStatusBatch } = useStore(chatStore)
@@ -102,6 +103,7 @@ const App = () => {
         <Route path="/verify-email" element={<VerifyEmailpage />} />
         <Route path="/forgot-password" element={<ForgotPasswordpage />} />
         <Route path="/reset-password" element={<ResetPasswordpage />} />
+        <Route path="/settings" element={<Settingspage />} />
         <Route
           path="/chat"
           element={
