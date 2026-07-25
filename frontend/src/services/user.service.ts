@@ -17,3 +17,9 @@ export const updateProfile = async (data: { displayName: string }) => {
   const response = await api.put("/users", data)
   return response
 }
+
+// function to update the user's account
+export const deleteAccount = async () => {
+  const response = await api.delete("/users")
+  return response
+}
