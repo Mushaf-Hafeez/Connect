@@ -6,6 +6,7 @@ import {
   MessageCircle,
   Phone,
   Search,
+  Settings,
   UserCheck,
   UserPlus,
   Users,
@@ -43,6 +44,7 @@ import { userStore } from "@/zustand/userStore"
 import { useStore } from "zustand"
 import toast from "react-hot-toast"
 import Spinner from "../custom/Spinner"
+import { Link } from "react-router-dom"
 
 interface Tab {
   id: number
@@ -149,6 +151,11 @@ const ChatSidebar = () => {
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
+
+                  <DropdownMenuItem className="flex cursor-pointer items-center gap-4 hover:bg-muted">
+                    <Settings />
+                    <Link to="/settings">Settings</Link>
+                  </DropdownMenuItem>
 
                   <AlertDialogTrigger className="w-full">
                     <DropdownMenuItem

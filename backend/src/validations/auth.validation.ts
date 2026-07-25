@@ -128,3 +128,18 @@ export const changePasswordValidation = z
     message: "Passwords don't match.",
     path: ["confirmPassword"],
   });
+
+// displayName validation
+export const displayNameValidation = z.object({
+  displayName: z
+    .string({
+      error: () => "Name is required.",
+    })
+    .trim()
+    .min(2, {
+      error: "Name must be at least 2 characters.",
+    })
+    .max(50, {
+      error: "Name cannot exceed 50 characters.",
+    }),
+});
