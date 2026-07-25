@@ -15,9 +15,40 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import toast from "react-hot-toast"
+import Spinner from "../custom/Spinner"
+import { useStore } from "zustand"
+import { userStore } from "@/zustand/userStore"
+import { useNavigate } from "react-router-dom"
+import { deleteAccount } from "@/services/user.service"
 
 const DangerZoneSettings = () => {
-  const [text, setText] = useState("")
+  const { clearUser } = useStore(userStore)
+
+  const [text, setText] = useState<string>("")
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
+
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false)
+
+  const navigate = useNavigate()
+
+  const handleAccountDelete = async () => {
+    setIsDeleting(true)
+    try {
+      const response = await deleteAccount()
+
+      if (response.status === 200) {
+        toast.success(response.data.message)
+        clearUser()
+        navigate("/")
+      }
+    } catch (error) {
+      console.log("Error while deleting the account: ", error)
+      toast.error(error.response.data.message || "Something went wrong.")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <Card className="border-destructive">
@@ -32,9 +63,11 @@ const DangerZoneSettings = () => {
           </p>
         </div>
 
-        <AlertDialog>
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive">Delete Account</Button>
+            <Button variant="destructive" className="cursor-pointer">
+              Delete Account
+            </Button>
           </AlertDialogTrigger>
 
           <AlertDialogContent>
@@ -55,8 +88,20 @@ const DangerZoneSettings = () => {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
 
-              <AlertDialogAction disabled={text !== "DELETE"}>
-                Delete Account
+              <AlertDialogAction
+                variant={"destructive"}
+                disabled={text !== "DELETE" || isDeleting}
+                className="cursor-pointer"
+                onClick={handleAccountDelete}
+              >
+                {isDeleting ? (
+                  <div className="flex items-center gap-2">
+                    <Spinner />
+                    Deleting
+                  </div>
+                ) : (
+                  "Delete Account"
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

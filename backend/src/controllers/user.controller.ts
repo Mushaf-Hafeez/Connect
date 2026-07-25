@@ -132,3 +132,29 @@ export const updateDisplayName = async (
     next(error);
   }
 };
+
+// ======================================================
+//             deleteAccount contoller
+// ======================================================
+export const deleteAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    await prisma.user.delete({
+      where: {
+        id: req.user.id,
+      },
+    });
+
+    res.clearCookie("token");
+
+    return res.status(200).json({
+      success: true,
+      message: "Account has been deleted.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
