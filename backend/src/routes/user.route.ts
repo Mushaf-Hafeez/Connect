@@ -16,7 +16,7 @@ userRoutes.get("/search", isAuth, searchUser);
 userRoutes.put(
   "/update-profile",
   isAuth,
-  upload.single("profile-pic"),
+  upload.single("profilePic"),
   updateProfilePic,
 );
 userRoutes.put("/", isAuth, updateDisplayName);

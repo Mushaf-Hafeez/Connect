@@ -19,6 +19,9 @@ interface UserState {
   setUser: (user: User) => void
   clearUser: () => void
   setIsCheckingAuth: (isCheckingAuth: boolean) => void
+
+  updateUserProfilePic: (profilePic: string) => void
+  updateUserDisplayName: (displayName: string) => void
 }
 
 const storedUser = localStorage.getItem("user")
@@ -39,5 +42,15 @@ export const userStore = create<UserState>((set) => ({
 
   setIsCheckingAuth: (isCheckingAuth: boolean) => {
     set({ isCheckingAuth })
+  },
+
+  updateUserProfilePic: (profilePic) => {
+    set((state) => ({ user: state.user && { ...state.user, profilePic } }))
+  },
+
+  updateUserDisplayName: (displayName) => {
+    set((state) => ({
+      user: state.user && { ...state.user, displayName },
+    }))
   },
 }))

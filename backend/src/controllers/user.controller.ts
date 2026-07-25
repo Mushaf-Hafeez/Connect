@@ -90,7 +90,7 @@ export const updateProfilePic = async (
 
     return res.status(200).json({
       sucess: true,
-      profilePic,
+      profilePic: profilePic.path,
       message: "profile pic updated successfully.",
     });
   } catch (error) {
