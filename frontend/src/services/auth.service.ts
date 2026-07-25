@@ -29,6 +29,12 @@ interface ResetPasswordData {
   confirmPassword: string
 }
 
+interface ChangePasswordData {
+  password: string
+  newPassword: string
+  confirmPassword: string
+}
+
 // login function
 export const login = (data: LoginData) => {
   const response = api.post("/auth/login", data)
@@ -55,7 +61,13 @@ export const forgotPassword = (data: ForgotPasswordData) => {
 
 // resetPassword function
 export const resetPassword = (data: ResetPasswordData) => {
-  const response = api.put("/auth/reset-password", data)
+  const response = api.put("/auth/-password", data)
+  return response
+}
+
+// changePassword function
+export const changePassword = (data: ChangePasswordData) => {
+  const response = api.put("/auth/change-password", data)
   return response
 }
 

@@ -440,10 +440,23 @@ export const changePassword = async (
       throw new AppError(400, "Validation failed.");
     }
 
-    const { password } = result.data;
+    const { password, newPassword } = result.data;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+      select: {
+        password: true,
+      },
+    });
+
+    if (!(await bcrypt.compare(password, user!.password))) {
+      throw new AppError(400, "Incorrect password.");
+    }
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     await prisma.user.update({
       where: {
@@ -453,6 +466,8 @@ export const changePassword = async (
         password: hashedPassword,
       },
     });
+
+    res.clearCookie("token");
 
     return res.status(200).json({
       success: true,
