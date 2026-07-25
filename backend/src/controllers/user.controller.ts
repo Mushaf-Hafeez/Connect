@@ -126,7 +126,7 @@ export const updateDisplayName = async (
 
     return res.status(200).json({
       success: true,
-      message: "Name has been updated.",
+      message: "Profile has been updated.",
     });
   } catch (error) {
     next(error);

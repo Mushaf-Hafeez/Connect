@@ -9,12 +9,47 @@ import { useStore } from "zustand"
 import { userStore } from "@/zustand/userStore"
 import { useState, type ChangeEvent } from "react"
 import toast from "react-hot-toast"
-import { updateProfilePic } from "@/services/user.service"
+import { updateProfile, updateProfilePic } from "@/services/user.service"
+
+import z from "zod"
+import type { SubmitHandler } from "react-hook-form"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import Spinner from "../custom/Spinner"
 
+const EditProfileSchema = z.object({
+  displayName: z
+    .string({
+      error: () => "Display name is required.",
+    })
+    .trim()
+    .min(2, {
+      error: "Display name must be at least 2 characters.",
+    })
+    .max(50, {
+      error: "Display name cannot exceed 50 characters.",
+    }),
+})
+
+type EditProfileData = z.infer<typeof EditProfileSchema>
+
 const AccountSettings = () => {
-  const { user, updateUserProfilePic } = useStore(userStore)
+  const { user, updateUserProfilePic, updateUserDisplayName } =
+    useStore(userStore)
   const [isUploading, setIsUploading] = useState<boolean>(false)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+    watch,
+  } = useForm({
+    defaultValues: {
+      displayName: user!.displayName,
+    },
+    resolver: zodResolver(EditProfileSchema),
+    mode: "onChange",
+  })
 
   // Todo: Add the logic to upload the file
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +68,7 @@ const AccountSettings = () => {
 
       const response = await updateProfilePic(formData)
 
-      if (response.status) {
+      if (response.status === 200) {
         updateUserProfilePic(response.data.profilePic)
         toast.success(response.data.message)
       }
@@ -42,6 +77,20 @@ const AccountSettings = () => {
       console.log("Error while upload the profile pic: ", error)
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const onSubmit: SubmitHandler<EditProfileData> = async (data) => {
+    try {
+      const response = await updateProfile(data)
+
+      if (response.status === 200) {
+        updateUserDisplayName(watch("displayName"))
+        toast.success(response.data.message)
+      }
+    } catch (error) {
+      console.log("Error while updating the user's profile: ", error)
+      toast.error(error.response.data.message || "Something went wrong.")
     }
   }
 
@@ -88,14 +137,32 @@ const AccountSettings = () => {
           />
         </div>
 
-        <div className="grid gap-6">
-          <div className="space-y-2">
-            <Label>Display Name</Label>
-            <Input placeholder="Mushaf Hafeez" />
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+          <div className="grid gap-6">
+            <div className="space-y-2">
+              <Label>Display Name</Label>
+              <Input {...register("displayName")} />
+              {errors && errors.displayName && (
+                <p className="text-red-400">{errors.displayName.message}</p>
+              )}
+            </div>
           </div>
-        </div>
 
-        <Button>Save Changes</Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex cursor-pointer items-center gap-2"
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <Spinner />
+                Saving
+              </div>
+            ) : (
+              "Save Changes"
+            )}
+          </Button>
+        </form>
       </CardContent>
     </Card>
   )
