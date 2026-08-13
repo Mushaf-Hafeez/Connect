@@ -46,3 +46,15 @@ export interface CallIceCandidatePayload extends CallSignalingPayload {
 export interface CallEndPayload extends CallSignalingPayload {
   duration?: number
 }
+
+export type CallRecordStatus = "MISSED" | "RECEIVED"
+export type CallDirection = "incoming" | "outgoing"
+
+export interface CallHistoryEntry {
+  id: string
+  status: CallRecordStatus
+  duration: number
+  createdAt: string
+  direction: CallDirection
+  peer: CallPeer
+}
