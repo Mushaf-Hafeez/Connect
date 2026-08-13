@@ -82,7 +82,7 @@ const CallHistoryList = ({ isActive, searchQuery }: CallHistoryListProps) => {
   }
 
   return (
-    <div>
+    <div className="scrollbar-none">
       {filteredCalls.map((call) => (
         <CallHistoryItem key={call.id} call={call} />
       ))}
