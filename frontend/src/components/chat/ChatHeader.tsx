@@ -30,6 +30,7 @@ import relativeTime from "dayjs/plugin/relativeTime"
 import calender from "dayjs/plugin/calendar"
 import toast from "react-hot-toast"
 import { useState } from "react"
+import { callStore } from "@/zustand/callStore"
 
 dayjs.extend(relativeTime)
 dayjs.extend(calender)
@@ -39,6 +40,7 @@ const ChatHeader = () => {
 
   const { chatSelected, clearChatSelected, isTyping } = useStore(chatStore)
   const { onlineUsers } = useStore(socketStore)
+  const { startCall, status: callStatus } = useStore(callStore)
 
   const navigate = useNavigate()
 
@@ -55,11 +57,19 @@ const ChatHeader = () => {
   }
 
   const handleAudioCall = () => {
-    toast.success("audio calling")
+    if (callStatus !== "idle" && callStatus !== "ended") {
+      toast.error("You are already in a call")
+      return
+    }
+    startCall({ id, displayName, profilePic }, false)
   }
 
   const handleVideoCall = () => {
-    toast.success("video calling")
+    if (callStatus !== "idle" && callStatus !== "ended") {
+      toast.error("You are already in a call")
+      return
+    }
+    startCall({ id, displayName, profilePic }, true)
   }
 
   const handleDelete = () => {

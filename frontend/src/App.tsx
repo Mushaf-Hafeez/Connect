@@ -21,6 +21,8 @@ import { socketStore } from "./zustand/socketStore"
 import { chatStore } from "./zustand/chatStore"
 import { conversationStore } from "./zustand/conversationStore"
 import Settingspage from "./pages/Settingspage"
+import CallOverlay from "./components/call/CallOverlay"
+import { callStore } from "./zustand/callStore"
 
 const App = () => {
   const { updateMessageStatusBatch } = useStore(chatStore)
@@ -34,6 +36,7 @@ const App = () => {
     removeOnlineUser,
   } = useStore(socketStore)
   const { updateLastMessageStatus } = useStore(conversationStore)
+  const { initSocketListeners, removeSocketListeners } = useStore(callStore)
 
   const navigate = useNavigate()
 
@@ -83,13 +86,15 @@ const App = () => {
     }
 
     socket.on("messages-delivered-batch", handleMessagesDeliveredBatch)
+    initSocketListeners(socket)
 
     return () => {
       socket.off("add-online-user")
       socket.off("remove-online-user")
       socket.off("messages-delivered-batch")
+      removeSocketListeners(socket)
     }
-  }, [socket])
+  }, [socket, initSocketListeners, removeSocketListeners])
 
   return (
     <main>
@@ -117,6 +122,7 @@ const App = () => {
         </Route>
         <Route path="*" element={<Errorpage />} />
       </Routes>
+      <CallOverlay />
     </main>
   )
 }
