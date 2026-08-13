@@ -32,6 +32,11 @@ enum ConversationType {
   GROUP // Ready for future use
 }
 
+enum CallStatus {
+  MISSED
+  RECEIVED
+}
+
 // ─────────────────────────────────────────
 // USER
 // ─────────────────────────────────────────
@@ -62,6 +67,9 @@ model User {
   conversations          ConversationParticipant[]
   sentMessages           Message[]
   messageStatuses        MessageStatus[]
+
+  callsMade     Call[] @relation("CallsMade")
+  callsReceived Call[] @relation("CallsReceived")
 
   @@index([email])
   @@index([username])
@@ -176,4 +184,22 @@ model MessageStatus {
 
   @@unique([messageId, userId]) // one status row per (message, recipient) pair
   @@index([userId, status])
+}
+
+model Call {
+  id         String     @id @default(cuid())
+  callerId   String
+  receiverId String
+  status     CallStatus
+  duration   Int        @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  caller   User @relation("CallsMade", fields: [callerId], references: [id], onDelete: Cascade)
+  receiver User @relation("CallsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([callerId])
+  @@index([receiverId])
+  @@index([createdAt])
 }
