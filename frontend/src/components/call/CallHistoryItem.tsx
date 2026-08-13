@@ -66,9 +66,6 @@ const CallHistoryItem = ({ call }: { call: CallHistoryEntry }) => {
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
           <p className="truncate font-medium">{call.peer.displayName}</p>
-          <span className="shrink-0 text-xs text-muted-foreground">
-            {formattedTime}
-          </span>
         </div>
 
         <div className="mt-0.5 flex items-center gap-1.5">
@@ -82,6 +79,10 @@ const CallHistoryItem = ({ call }: { call: CallHistoryEntry }) => {
           </p>
         </div>
       </div>
+
+          <span className="shrink-0 text-xs text-muted-foreground">
+            {formattedTime}
+          </span>
 
       <Button
         variant="ghost"

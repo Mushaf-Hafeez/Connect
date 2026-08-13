@@ -112,7 +112,7 @@ const ChatSidebar = () => {
         {/* Header */}
         <div className="border-b p-4">
           <div className="mb-4 flex items-center justify-between">
-            <h1 className="text-2xl font-semibold">Messages</h1>
+            <h1 className="text-2xl font-semibold">Connect</h1>
 
             <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
               <DropdownMenu>
@@ -251,7 +251,7 @@ const ChatSidebar = () => {
 
           <TabsContent
             value="calls"
-            className="mt-0 min-h-0 flex-1 overflow-y-auto"
+            className="mt-0 min-h-0 flex-1 overflow-y-auto scrollbar-none"
           >
             <CallHistoryList
               isActive={defaultTab === "calls"}
