@@ -17,6 +17,7 @@ import authRoutes from "./routes/auth.route.js";
 import friendRoutes from "./routes/friend.route.js";
 import userRoutes from "./routes/user.route.js";
 import conversationRoutes from "./routes/conversation.route.js";
+import callRoutes from "./routes/call.route.js";
 
 // environment variables
 import { config } from "dotenv";
@@ -40,6 +41,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/friends", friendRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/conversations", conversationRoutes);
+app.use("/api/v1/calls", callRoutes);
 
 // global error handler
 app.use(

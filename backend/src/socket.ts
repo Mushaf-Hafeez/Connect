@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 
 import { config } from "dotenv";
 import prisma from "./config/db.config.js";
+import { registerCallHandlers } from "./handlers/call.handler.js";
 config();
 
 export const app: Application = express();
@@ -137,6 +138,8 @@ io.on("connection", (socket) => {
       });
     }
   });
+
+  registerCallHandlers(io, socket, userId);
 
   socket.on("messages-seen", async (id) => {
     const notSeenMessages = await prisma.messageStatus.findMany({
