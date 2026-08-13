@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/alert-dialog"
 
 import ChatList from "./ChatList"
+import CallHistoryList from "../call/CallHistoryList"
 import PendingRequests from "../friends/PendingRequests"
 import AddFriend from "../friends/AddFriend"
 import ManageFriends from "../friends/ManageFriends"
@@ -198,7 +199,11 @@ const ChatSidebar = () => {
           <div className="relative">
             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search conversations..."
+              placeholder={
+                defaultTab === "calls"
+                  ? "Search calls..."
+                  : "Search conversations..."
+              }
               className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -246,9 +251,12 @@ const ChatSidebar = () => {
 
           <TabsContent
             value="calls"
-            className="mt-0 min-h-0 flex-1 overflow-y-auto p-4"
+            className="mt-0 min-h-0 flex-1 overflow-y-auto"
           >
-            calls tab
+            <CallHistoryList
+              isActive={defaultTab === "calls"}
+              searchQuery={searchQuery}
+            />
           </TabsContent>
         </Tabs>
 
