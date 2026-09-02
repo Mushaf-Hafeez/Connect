@@ -215,6 +215,68 @@ export const getConversations = async (
 };
 
 // ======================================================
+//             getConversation controller
+// ======================================================
+export const getConversation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = conversationIdValidation.safeParse(req.params);
+
+    if (!result.success) {
+      throw new AppError(400, "Validation failed.");
+    }
+
+    const { conversationId } = result.data;
+
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        id: conversationId,
+        type: "DIRECT",
+        participants: {
+          some: {
+            userId: req.user.id,
+          },
+        },
+      },
+      select: {
+        id: true,
+        type: true,
+        participants: {
+          where: { userId: { not: req.user.id } },
+          select: {
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+                username: true,
+                profilePic: true,
+                lastSeen: true,
+              },
+            },
+            lastReadAt: true,
+            joinedAt: true,
+          },
+        },
+      },
+    });
+
+    if (!conversation) {
+      throw new AppError(404, "Conversation not found.");
+    }
+
+    return res.status(200).json({
+      success: true,
+      conversation,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ======================================================
 //             getMessages controller
 // ======================================================
 export const getMessages = async (
