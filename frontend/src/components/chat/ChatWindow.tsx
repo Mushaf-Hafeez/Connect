@@ -1,8 +1,8 @@
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import ChatHeader from "./ChatHeader"
 import MessageInput from "./MessageInput"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import { getMessages } from "@/services/conversation.service"
+import { getConversation, getMessages } from "@/services/conversation.service"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   MessageScroller,
@@ -39,6 +39,7 @@ const ChatWindow = () => {
     (state) => state.setConversationId
   )
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isHydratingChat, setIsHydratingChat] = useState<boolean>(false)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [isFetchingOlder, setIsFetchingOlder] = useState(false)
@@ -50,6 +51,61 @@ const ChatWindow = () => {
 
   const params = useParams()
   const id = params.id
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!id) return
+
+    let cancelled = false
+
+    const hydrateChat = async () => {
+      const { chatSelected, conversationId, setChatSelected, setIsChatSelected } =
+        chatStore.getState()
+
+      if (conversationId === id && chatSelected) {
+        setIsChatSelected(true)
+        return
+      }
+
+      const cachedConversation = conversationStore
+        .getState()
+        .conversations?.find((convo) => convo.id === id)
+
+      if (cachedConversation?.participants[0]) {
+        setChatSelected(cachedConversation.participants[0], id)
+        setIsChatSelected(true)
+        return
+      }
+
+      setIsHydratingChat(true)
+
+      try {
+        const response = await getConversation(id)
+
+        if (cancelled) return
+
+        if (response.status === 200) {
+          const participant = response.data.conversation.participants[0]
+          chatStore.getState().setChatSelected(participant, id)
+          chatStore.getState().setIsChatSelected(true)
+        }
+      } catch (error) {
+        if (cancelled) return
+        console.error("Error hydrating chat:", error)
+        navigate("/chat")
+      } finally {
+        if (!cancelled) {
+          setIsHydratingChat(false)
+        }
+      }
+    }
+
+    hydrateChat()
+
+    return () => {
+      cancelled = true
+    }
+  }, [id, navigate])
 
   useEffect(() => {
     if (id) {
@@ -183,10 +239,10 @@ const ChatWindow = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <ChatHeader />
+      <ChatHeader isLoading={isHydratingChat} />
 
       <div className="min-h-0 flex-1 scrollbar-none p-4">
-        {isLoading ? (
+        {isLoading || isHydratingChat ? (
           <div className="space-y-4">
             {Array.from({ length: 4 }).map((_, index) => {
               const isRightAligned = index % 2 === 1
@@ -247,7 +303,7 @@ const ChatWindow = () => {
         )}
       </div>
 
-      {!isLoading && (
+      {!isLoading && !isHydratingChat && (
         <div className="px-4 pb-1">
           <TypingIndicator />
         </div>

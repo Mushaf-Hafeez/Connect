@@ -12,6 +12,12 @@ export const createConversation = async (userId: string) => {
   return response
 }
 
+// getConversation function
+export const getConversation = async (conversationId: string) => {
+  const response = await api.get(`/conversations/${conversationId}`)
+  return response
+}
+
 // getMessages function
 export const getMessages = async (
   conversationId: string,

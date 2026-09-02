@@ -10,6 +10,7 @@ import { isAuth } from "../middlewares/auth.middleware.js";
 import {
   conversation,
   getConversations,
+  getConversation,
   getMessages,
   sendMessage,
   updateMessage,
@@ -20,6 +21,7 @@ import { upload } from "../config/multer.config.js";
 conversationRoutes.post("/:userId", isAuth, conversation);
 conversationRoutes.get("/", isAuth, getConversations);
 conversationRoutes.get("/:conversationId/messages", isAuth, getMessages);
+conversationRoutes.get("/:conversationId", isAuth, getConversation);
 conversationRoutes.post(
   "/:conversationId/messages",
   isAuth,
