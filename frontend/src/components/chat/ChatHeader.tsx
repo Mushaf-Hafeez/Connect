@@ -35,7 +35,7 @@ import { callStore } from "@/zustand/callStore"
 dayjs.extend(relativeTime)
 dayjs.extend(calender)
 
-const ChatHeader = () => {
+const ChatHeader = ({ isLoading = false }: { isLoading?: boolean }) => {
   const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false)
 
   const { chatSelected, clearChatSelected, isTyping } = useStore(chatStore)
@@ -43,6 +43,20 @@ const ChatHeader = () => {
   const { startCall, status: callStatus } = useStore(callStore)
 
   const navigate = useNavigate()
+
+  if (isLoading || !chatSelected) {
+    return (
+      <header className="flex h-16 items-center border-b px-4">
+        <div className="flex items-center gap-3">
+          <div className="size-10 animate-pulse rounded-full bg-muted" />
+          <div className="space-y-2">
+            <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+      </header>
+    )
+  }
 
   const { displayName, profilePic, id, lastSeen } = chatSelected.user
 
